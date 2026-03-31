@@ -3,13 +3,23 @@
 import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Users, Activity, BarChart2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { fetchAPI } from "@/lib/api";
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+
   useEffect(() => {
+    // Check Authentication
+    const token = typeof window !== 'undefined' ? localStorage.getItem("admin_token") : null;
+    if (token !== "super-secret-admin-session") {
+        router.push("/login");
+        return;
+    }
+
     const loadAnalytics = async () => {
       try {
         const [summary, departments, workerStats] = await Promise.all([

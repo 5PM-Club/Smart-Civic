@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Search, Filter, MoreVertical, MapPin, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { fetchAPI } from "@/lib/api";
 
 export default function ComplaintsList() {
@@ -24,7 +25,7 @@ export default function ComplaintsList() {
         category: c.category.charAt(0).toUpperCase() + c.category.slice(1).replace('_', ' '),
         status: c.status,
         date: new Date(c.created_at).toLocaleDateString(),
-        address: c.address_ward || 'N/A',
+        address: c.address_ward || (c.lat ? '📍 GPS Pin' : 'N/A'),
         worker: c.workers?.name || 'Unassigned',
       })));
     } catch (err) {
@@ -34,9 +35,18 @@ export default function ComplaintsList() {
     }
   };
 
+  const router = useRouter();
+
   useEffect(() => {
+    // Check Authentication
+    const token = typeof window !== 'undefined' ? localStorage.getItem("admin_token") : null;
+    if (token !== "super-secret-admin-session") {
+        router.push("/login");
+        return;
+    }
+
     loadComplaints();
-  }, []);
+  }, [router]);
 
   const handleUpdateStatus = async (dbId: string, status: string, worker_id?: string) => {
       try {

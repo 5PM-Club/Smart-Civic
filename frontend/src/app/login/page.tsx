@@ -10,23 +10,33 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Auto-redirect if already logged in
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem("admin_token");
+      if (token === "super-secret-admin-session") {
+        router.push("/admin");
+      }
+    }
+  });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     
-    // Hardcoded special credentials for MVP
-    setTimeout(() => {
-      if (password === "admin123") {
-        // Set both Cookie (for middleware/older patterns) and LocalStorage (for the Dashboard)
-        document.cookie = "adminAuth=true; path=/; max-age=86400"; 
-        localStorage.setItem("admin_token", "super-secret-admin-session");
-        
-        router.push("/admin");
-      } else {
-        setError("Invalid access credentials");
-        setLoading(false);
-      }
-    }, 600);
+    // Validate credentials
+    if (password === "admin123") {
+      // Set both Cookie and LocalStorage
+      document.cookie = "adminAuth=true; path=/; max-age=86400"; 
+      localStorage.setItem("admin_token", "super-secret-admin-session");
+      
+      // Use window.location.href for a full refresh to ensure all layers pick up the auth
+      window.location.href = "/admin";
+    } else {
+      setError("Invalid access credentials");
+      setLoading(false);
+    }
   };
 
   return (
