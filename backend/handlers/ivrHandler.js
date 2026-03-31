@@ -197,23 +197,29 @@ const handleIVRInstantWhatsApp = async (req, res) => {
             channel: 'whatsapp'
         });
 
-        // 3. Send message
+        // 3. Respond to Exotel IMMEDIATELY (Non-blocking)
+        // This ensures the call ends gracefully and doesn't timeout while waiting for Vonage
+        res.status(200).send('OK');
+        console.log(`[IVR-LOG] Exotel Response Sent. Dispatching message in background...`);
+
+        // 4. Send message in the background
         const welcomeMsg = `🚨 *SMART CIVIC REPORT* 🚨\n\nYou selected *${category.toUpperCase().replace('_', ' ')}*.\n\nPlease send your **Live Location** or type your **Ward Name** now.`;
         
-        console.log(`[IVR-LOG] Dispatching message to ${phone}...`);
-        const messageId = await sendMessage(phone, welcomeMsg, 'whatsapp');
-        
-        if (messageId) {
-            console.log(`[IVR SUCCESS] WhatsApp sent: ${messageId}`);
-        } else {
-            console.log(`[IVR-WARNING] WhatsApp failed/opt-out. Trying SMS...`);
-            await sendMessage(phone, `Smart Civic: You selected ${category}. Please reply with your Ward to continue.`, 'sms');
+        try {
+            const messageId = await sendMessage(phone, welcomeMsg, 'whatsapp');
+            
+            if (messageId) {
+                console.log(`[IVR SUCCESS] WhatsApp sent: ${messageId}`);
+            } else {
+                console.log(`[IVR-WARNING] WhatsApp failed/opt-out. Trying SMS...`);
+                await sendMessage(phone, `Smart Civic: You selected ${category}. Please reply with your Ward to continue.`, 'sms');
+            }
+        } catch (msgErr) {
+            console.error(`[IVR-MSG-ERR] Async message dispatch failed:`, msgErr.message);
         }
-
-        return res.status(200).send('OK');
     } catch (err) {
         console.error(`[IVR CRASH] Fatal Error Line: ${err.stack}`);
-        return res.status(200).send('OK'); // Always send OK to Exotel
+        if (!res.headersSent) res.status(200).send('OK'); // Always send OK to Exotel
     }
 };
 
