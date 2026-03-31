@@ -64,10 +64,24 @@ export default function AnalyticsPage() {
     <div className="space-y-8 p-6 min-h-[calc(100vh-64px)] fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">Analytics & Insights</h1>
-        <button className="flex items-center space-x-2 bg-slate-900 border border-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800 hover:text-white shadow-sm transition-colors">
-            <BarChart2 size={16} />
-            <span>Generate Report</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={() => {
+                setLoading(true);
+                // The useEffect will trigger again if we use a state dependency, 
+                // but let's just expose a refresh function or re-run logic.
+                window.location.reload(); 
+            }}
+            className="flex items-center space-x-2 bg-slate-900 border border-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800 hover:text-emerald-400 group transition-all shadow-sm"
+          >
+              <Activity size={16} className="group-hover:animate-pulse" />
+              <span>Refresh Data</span>
+          </button>
+          <button className="flex items-center space-x-2 bg-slate-900 border border-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800 hover:text-white shadow-sm transition-colors">
+              <BarChart2 size={16} />
+              <span>Generate Report</span>
+          </button>
+        </div>
       </div>
       
       {/* Top Metric Cards */}

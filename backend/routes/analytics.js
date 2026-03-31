@@ -73,36 +73,28 @@ router.get('/leaderboard', async (req, res) => {
 // GET /api/analytics/departments
 router.get('/departments', async (req, res) => {
     try {
-        const { data: departments, error } = await supabase
-            .from('departments')
-            .select('id, name');
+        const [{ data: departments }, { data: complaints }] = await Promise.all([
+            supabase.from('departments').select('id, name'),
+            supabase.from('complaints').select('department_id, status')
+        ]);
 
-        if (error) throw error;
+        if (!departments) return res.json([]);
 
-        const deptStats = [];
-        for (const dept of departments) {
-            const { count: totalCount } = await supabase
-                .from('complaints')
-                .select('*', { count: 'exact', head: true })
-                .eq('department_id', dept.id);
+        const stats = departments.map(dept => {
+            const deptComplaints = (complaints || []).filter(c => c.department_id === dept.id);
+            const total = deptComplaints.length;
+            const resolved = deptComplaints.filter(c => c.status === 'resolved').length;
+            const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
-            const { count: resolvedCount } = await supabase
-                .from('complaints')
-                .select('*', { count: 'exact', head: true })
-                .eq('department_id', dept.id)
-                .eq('status', 'resolved');
-
-            const rate = totalCount > 0 ? Math.round((resolvedCount / totalCount) * 100) : 0;
-
-            deptStats.push({
+            return {
                 name: dept.name,
-                total: totalCount || 0,
-                resolved: resolvedCount || 0,
+                total,
+                resolved,
                 rate: `${rate}%`
-            });
-        }
+            };
+        });
 
-        res.json(deptStats);
+        res.json(stats);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -111,35 +103,28 @@ router.get('/departments', async (req, res) => {
 // GET /api/analytics/workers
 router.get('/workers', async (req, res) => {
     try {
-        const { data: workers, error } = await supabase
-            .from('workers')
-            .select('id, name, departments(name)');
+        const [{ data: workers }, { data: complaints }] = await Promise.all([
+            supabase.from('workers').select('id, name, departments(name)'),
+            supabase.from('complaints').select('worker_id, status')
+        ]);
 
-        if (error) throw error;
+        if (!workers) return res.json([]);
 
-        const workerStats = [];
-        for (const worker of workers) {
-            const { count: resolvedCount } = await supabase
-                .from('complaints')
-                .select('*', { count: 'exact', head: true })
-                .eq('worker_id', worker.id)
-                .eq('status', 'resolved');
+        const stats = workers.map(w => {
+            const workerComplaints = (complaints || []).filter(c => c.worker_id === w.id);
+            const total = workerComplaints.length;
+            const resolved = workerComplaints.filter(c => c.status === 'resolved').length;
 
-            const { count: totalAssigned } = await supabase
-                .from('complaints')
-                .select('*', { count: 'exact', head: true })
-                .eq('worker_id', worker.id);
+            return {
+                name: w.name,
+                department: w.departments?.name || 'Unassigned',
+                resolved,
+                total_assigned: total
+            };
+        });
 
-            workerStats.push({
-                name: worker.name,
-                department: worker.departments?.name || 'Unassigned',
-                resolved: resolvedCount || 0,
-                total_assigned: totalAssigned || 0
-            });
-        }
-
-        workerStats.sort((a, b) => b.resolved - a.resolved);
-        res.json(workerStats);
+        stats.sort((a, b) => b.resolved - a.resolved);
+        res.json(stats);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
