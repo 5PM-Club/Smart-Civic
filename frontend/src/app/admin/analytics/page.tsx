@@ -68,18 +68,12 @@ export default function AnalyticsPage() {
           <button 
             onClick={() => {
                 setLoading(true);
-                // The useEffect will trigger again if we use a state dependency, 
-                // but let's just expose a refresh function or re-run logic.
                 window.location.reload(); 
             }}
             className="flex items-center space-x-2 bg-slate-900 border border-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800 hover:text-emerald-400 group transition-all shadow-sm"
           >
               <Activity size={16} className="group-hover:animate-pulse" />
               <span>Refresh Data</span>
-          </button>
-          <button className="flex items-center space-x-2 bg-slate-900 border border-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800 hover:text-white shadow-sm transition-colors">
-              <BarChart2 size={16} />
-              <span>Generate Report</span>
           </button>
         </div>
       </div>

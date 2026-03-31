@@ -112,7 +112,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-[0_0_30px_rgba(0,0,0,0.5)] flex flex-col justify-between group overflow-hidden relative">
             <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-[20px] group-hover:bg-blue-500/20 transition-all"></div>
             <div className="flex items-start justify-between">
@@ -133,28 +133,6 @@ export default function AdminDashboard() {
             <div className="mt-4">
                 <h3 className="text-4xl font-black text-white">{loading ? '-' : stats.resolved}</h3>
                 <p className="text-emerald-400 text-sm font-bold mt-2">{resolutionRate}% resolution rate</p>
-            </div>
-        </div>
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-[0_0_30px_rgba(0,0,0,0.5)] flex flex-col justify-between group overflow-hidden relative border-b-2 border-b-red-500/50">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/10 rounded-full blur-[20px] group-hover:bg-red-500/20 transition-all"></div>
-            <div className="flex items-start justify-between">
-                <p className="text-slate-400 text-sm font-bold tracking-wider uppercase flex items-center gap-2"><Shield size={16}/> SLA Breached</p>
-                <div className="p-2.5 bg-red-500/20 text-red-500 rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse"><AlertTriangle size={20} /></div>
-            </div>
-            <div className="mt-4">
-                <h3 className="text-4xl font-black text-white drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]">{loading ? '-' : stats.escalated}</h3>
-                <p className="text-red-400 text-sm font-bold mt-2">{stats.escalated > 0 ? 'Needs attention' : 'All clear'}</p>
-            </div>
-        </div>
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-[0_0_30px_rgba(0,0,0,0.5)] flex flex-col justify-between group overflow-hidden relative">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-[20px] group-hover:bg-cyan-500/20 transition-all"></div>
-            <div className="flex items-start justify-between">
-                <p className="text-slate-400 text-sm font-bold tracking-wider uppercase">Avg Resolution</p>
-                <div className="p-2.5 bg-cyan-500/20 text-cyan-400 rounded-xl shadow-[0_0_10px_rgba(6,182,212,0.3)]"><Clock size={20} /></div>
-            </div>
-            <div className="mt-4">
-                <h3 className="text-4xl font-black text-white">{loading ? '-' : stats.avgTime}</h3>
-                <p className="text-emerald-400 text-sm font-bold mt-2 flex items-center gap-1"><TrendingDown size={14}/> Improving</p>
             </div>
         </div>
       </div>
