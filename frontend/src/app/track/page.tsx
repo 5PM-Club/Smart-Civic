@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Search, MapPin, Clock, CheckCircle2, AlertCircle, User, HardHat, List, Image as ImageIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { fetchAPI } from "@/lib/api";
 
-export default function TrackTicket() {
+function TrackContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
@@ -289,5 +289,17 @@ export default function TrackTicket() {
 
       </div>
     </main>
+  );
+}
+
+export default function TrackTicket() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-orange-500 animate-pulse font-bold text-xl">Loading Tracker...</div>
+      </div>
+    }>
+      <TrackContent />
+    </Suspense>
   );
 }
