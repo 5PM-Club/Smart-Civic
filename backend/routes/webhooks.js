@@ -9,7 +9,8 @@ const {
     handleIVRCategory, 
     handleIVRZone, 
     handleIVRWard, 
-    handleIVRRecording 
+    handleIVRRecording,
+    handleIVRInstantWhatsApp
 } = require('../handlers/ivrHandler');
 
 // ========== VONAGE WHATSAPP WEBHOOKS ==========
