@@ -150,40 +150,60 @@ const handleIVRRecording = async (req, res) => {
 };
 
 const handleIVRInstantWhatsApp = async (req, res) => {
-    const phone = req.body.From || req.body.from || req.query.From || '';
-    const digit = req.query.digit || req.body.digits || req.body.Digits || '';
-    
-    console.log(`[IVR-to-WhatsApp] Digit ${digit} from ${phone}`);
+    try {
+        console.log(`[IVR-to-WhatsApp Decode] Raw Body:`, JSON.stringify(req.body));
+        console.log(`[IVR-to-WhatsApp Decode] Raw Query:`, JSON.stringify(req.query));
 
-    const map = { '1': 'garbage', '2': 'pothole', '3': 'drainage', '4': 'water_leak', '5': 'streetlight' };
-    const category = map[digit] || 'general';
+        let phone = req.body.From || req.body.from || req.query.From || '';
+        const digit = req.query.digit || req.body.digits || req.body.Digits || '';
+        
+        if (!phone) {
+            console.error('[IVR ERROR] No phone number found in request.');
+            return res.status(200).send('No phone'); 
+        }
 
-    // 1. Ensure Citizen exists and set state
-    let { data: citizen } = await supabase.from('citizens').select('*').eq('phone', phone).single();
-    if (!citizen) {
-        const { data: newCitizen } = await supabase.from('citizens').insert([{ phone }]).select().single();
-        citizen = newCitizen;
+        // Normalize phone: Ensure it has a '+' prefix for our database/session store
+        if (!phone.startsWith('+')) phone = `+${phone}`;
+
+        console.log(`[IVR-to-WhatsApp] Digit ${digit} from confirmed phone ${phone}`);
+
+        const map = { '1': 'garbage', '2': 'pothole', '3': 'drainage', '4': 'water_leak', '5': 'streetlight' };
+        const category = map[digit] || 'general';
+
+        // 1. Ensure Citizen exists and set state
+        let { data: citizen, error: citError } = await supabase.from('citizens').select('*').eq('phone', phone).single();
+        if (!citizen) {
+            console.log(`[IVR] Creating new citizen for ${phone}`);
+            const { data: newCitizen } = await supabase.from('citizens').insert([{ phone }]).select().single();
+            citizen = newCitizen;
+        }
+
+        // 2. Set Session state for WhatsApp handler to pickup
+        setSession(phone, { 
+            state: 'AWAIT_LOCATION', 
+            category: category,
+            channel: 'whatsapp'
+        });
+
+        // 3. Send the outbound WhatsApp message
+        const welcomeMsg = `🚨 *SMART CIVIC ACTION REQUIRED* 🚨\n\nYou selected *${category.toUpperCase().replace('_', ' ')}* via our IVR Call.\n\nTo complete your report, please send your **Live Location** or type your **Ward Name** now.`;
+        
+        console.log(`[IVR] Attempting to send WhatsApp message to ${phone}...`);
+        const messageId = await sendMessage(phone, welcomeMsg, 'whatsapp');
+        
+        if (messageId) {
+            console.log(`[IVR SUCCESS] WhatsApp sent: ${messageId}`);
+        } else {
+            console.log(`[IVR WARNING] WhatsApp failed (likely Sandbox opt-in missing). Sending SMS fallback...`);
+            await sendMessage(phone, `Smart Civic: You selected ${category}. Please reply with your Ward & Issue details.`, 'sms');
+        }
+
+        // 4. Respond to Exotel (Plain text for Passthru is safer)
+        res.status(200).send('OK');
+    } catch (err) {
+        console.error(`[IVR CRASH] Fatal error in handleIVRInstantWhatsApp:`, err.message);
+        res.status(200).send('OK-with-error'); // Still send OK so Exotel doesn't loop
     }
-
-    // 2. Set Session state for WhatsApp handler to pickup
-    setSession(phone, { 
-        state: 'AWAIT_LOCATION', 
-        category: category,
-        channel: 'whatsapp'
-    });
-
-    // 3. Send the outbound WhatsApp message
-    const welcomeMsg = `Hi! You selected *${category.replace('_', ' ')}* via our IVR call. \n\nTo finish your report, please send your **Live Location** or type your **Ward Name**.`;
-    await sendMessage(phone, welcomeMsg, 'whatsapp');
-
-    // 4. Respond to Exotel to end the call gracefully
-    res.set('Content-Type', 'text/xml');
-    res.send(`
-        <Response>
-            <Say voice="alice">Thank you. I have sent a WhatsApp message to your number. Please check it to finish your report. Goodbye.</Say>
-            <Hangup />
-        </Response>
-    `);
 };
 
 /**
