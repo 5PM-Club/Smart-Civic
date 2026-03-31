@@ -145,6 +145,8 @@ router.post('/', async (req, res) => {
     }
 });
 
+const { sendMessage } = require('../utils/notify');
+
 // PATCH /api/complaints/:id/status
 router.patch('/:id/status', async (req, res) => {
     try {
@@ -154,15 +156,22 @@ router.patch('/:id/status', async (req, res) => {
         const updates = { status, updated_at: new Date() };
         if (worker_id !== undefined) updates.worker_id = worker_id;
 
-        const { data, error } = await supabase
+        const { data: complaint, error } = await supabase
             .from('complaints')
             .update(updates)
             .eq('id', id)
-            .select()
+            .select('*, citizens(phone)')
             .single();
 
         if (error) throw error;
-        res.json(data);
+
+        // If marked as resolved by admin, notify the citizen
+        if (status === 'resolved' && complaint.citizens && complaint.citizens.phone) {
+            const message = `Update: Your complaint ${complaint.ticket_id} has been marked as RESOLVED by the administration. Thank you for using Smart Civic.`;
+            await sendMessage(complaint.citizens.phone, message, complaint.channel || 'whatsapp');
+        }
+
+        res.json(complaint);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

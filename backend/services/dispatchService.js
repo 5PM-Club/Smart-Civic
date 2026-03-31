@@ -1,7 +1,7 @@
 // backend/services/dispatchService.js
 const supabase = require('../config/supabase');
 const { findAvailableWorker } = require('./routingEngine');
-const { sendWhatsApp } = require('../utils/notify');
+const { sendMessage } = require('../utils/notify');
 
 /**
  * Assigns a worker to a complaint and sends notifications.
@@ -26,7 +26,7 @@ const dispatchComplaint = async (complaintId) => {
         const worker = await findAvailableWorker(complaint.department_id);
 
         if (!worker) {
-            console.log(`[DISPATCH] No available workers in ${complaint.departments.name}. Ticket ${complaint.ticket_id} remains OPEN.`);
+            console.log(`[DISPATCH] No available workers in ${complaint.departments?.name || 'Assigned Department'}. Ticket ${complaint.ticket_id} remains OPEN.`);
             return;
         }
 
@@ -45,13 +45,13 @@ const dispatchComplaint = async (complaintId) => {
         // 4. Mark Worker as Unavailable
         await supabase.from('workers').update({ is_available: false }).eq('id', worker.id);
 
-        // 5. Notify Worker
+        // 5. Notify Worker (Default to WhatsApp for now, but use sendMessage)
         const workerMsg = `Hello ${worker.name}! A new ticket ${complaint.ticket_id} has been assigned to you.\nCategory: ${complaint.category}\nLocation: ${complaint.address_ward}\nDescription: ${complaint.description}\nPlease resolve this within the SLA deadline.`;
-        await sendWhatsApp(worker.phone, workerMsg, complaint.photo_url);
+        await sendMessage(worker.phone, workerMsg, 'whatsapp', complaint.photo_url);
 
-        // 6. Notify Citizen
+        // 6. Notify Citizen (on their original channel)
         const citizenMsg = `Update: A worker (${worker.name}) has been assigned to your complaint ${complaint.ticket_id}. They will contact you if needed.`;
-        await sendWhatsApp(complaint.citizens.phone, citizenMsg);
+        await sendMessage(complaint.citizens.phone, citizenMsg, complaint.channel || 'whatsapp');
 
         console.log(`[DISPATCH] Ticket ${complaint.ticket_id} assigned to ${worker.name}.`);
     } catch (err) {
