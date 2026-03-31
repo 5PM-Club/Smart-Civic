@@ -12,8 +12,8 @@ export default function ClientNav() {
         <div className="flex justify-between items-center h-16">
           <div className="flex">
             <Link href="/" className="flex items-center space-x-2 text-xl font-extrabold tracking-tight text-white group">
-              <span className="w-8 h-8 font-sans bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white text-lg shadow-[0_0_15px_rgba(249,115,22,0.5)] group-hover:shadow-[0_0_25px_rgba(249,115,22,0.8)] transition-all">J</span>
-              <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">JanataFlow</span>
+              <span className="w-8 h-8 font-sans bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white text-lg shadow-[0_0_15px_rgba(249,115,22,0.5)] group-hover:shadow-[0_0_25px_rgba(249,115,22,0.8)] transition-all">S</span>
+              <span className="drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">Smart Civic</span>
             </Link>
           </div>
           <div className="flex items-center space-x-6">

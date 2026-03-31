@@ -175,7 +175,7 @@ export default function Home() {
             <span className="tracking-wide uppercase text-xs">Fast • Transparent • Accountable</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-white to-emerald-400 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-            Janata Civic Reporting
+            Smart Civic Reporting
           </h1>
           <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
             Report civic issues in your area instantly. We automatically route them to the right municipal department and track them until resolved.
