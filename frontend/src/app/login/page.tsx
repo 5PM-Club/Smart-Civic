@@ -48,7 +48,6 @@ export default function LoginPage() {
             <div className="space-y-2">
                 <div className="flex justify-between items-center">
                     <label className="text-sm font-bold text-slate-300 tracking-wide uppercase">Access Key</label>
-                    <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-1 rounded border border-orange-500/20 shadow-[0_0_8px_rgba(249,115,22,0.2)]">Hint: admin123</span>
                 </div>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
