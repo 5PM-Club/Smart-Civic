@@ -59,7 +59,8 @@ router.post('/whatsapp/inbound', async (req, res) => {
             mediaUrl: mediaUrl,
             latitude: lat,
             longitude: long,
-            messageType: msgType
+            messageType: msgType,
+            channel: 'whatsapp'
         };
 
         // 1. Identify: Is this a Worker or a Citizen?
@@ -97,14 +98,15 @@ router.post('/sms', async (req, res) => {
     const text = req.body.text || '';
     console.log(`[SMS Inbound] From: ${from}, Text: ${text}`);
     
-    // For prototype: treat SMS the same as WhatsApp
+    // Normalize for SMS
     const normalized = {
         phone: from,
         body: text,
         mediaUrl: null,
         latitude: null,
         longitude: null,
-        messageType: 'text'
+        messageType: 'text',
+        channel: 'sms'
     };
 
     try {
