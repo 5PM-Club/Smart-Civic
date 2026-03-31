@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     // Check Authentication
     const token = typeof window !== 'undefined' ? localStorage.getItem("admin_token") : null;
     if (token !== "super-secret-admin-session") {
-        router.push("/admin/login");
+        router.push("/login");
         return;
     }
     setAuthenticated(true);

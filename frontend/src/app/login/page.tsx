@@ -17,7 +17,10 @@ export default function LoginPage() {
     // Hardcoded special credentials for MVP
     setTimeout(() => {
       if (password === "admin123") {
-        document.cookie = "adminAuth=true; path=/; max-age=86400"; // 1 day cookie
+        // Set both Cookie (for middleware/older patterns) and LocalStorage (for the Dashboard)
+        document.cookie = "adminAuth=true; path=/; max-age=86400"; 
+        localStorage.setItem("admin_token", "super-secret-admin-session");
+        
         router.push("/admin");
       } else {
         setError("Invalid access credentials");
