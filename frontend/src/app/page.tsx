@@ -264,11 +264,11 @@ export default function Home() {
                     <select required value={formData.ward} onChange={(e) => setFormData({...formData, ward: e.target.value})} className="w-full px-4 py-3.5 rounded-xl border border-slate-800 bg-slate-950 text-white focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 outline-none transition-all shadow-inner">
                         <option value="" disabled>Select Locality</option>
                         <option>Virudhunagar Town</option>
+                        <option>Aruppukkottai</option>
+                        <option>Sattur</option>
                         <option>Sivakasi</option>
                         <option>Rajapalayam</option>
                         <option>Srivilliputhur</option>
-                        <option>Aruppukkottai</option>
-                        <option>Sattur</option>
                     </select>
                     <input type="text" value={formData.locality} onChange={(e) => setFormData({...formData, locality: e.target.value})} placeholder="Street / Landmark" className="w-full px-4 py-3.5 rounded-xl border border-slate-800 bg-slate-950 text-white focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 outline-none transition-all shadow-inner" />
                 </div>

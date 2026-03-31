@@ -47,7 +47,7 @@ const handleIVRCategory = async (req, res) => {
         const ncco = [
             {
                 action: 'talk',
-                text: `You have selected ${category.replace('_', ' ')}. Please select your zone. Press 1 for Zone 1, 2 for Zone 2, 3 for Zone 3.`,
+                text: `You have selected ${category.replace('_', ' ')}. Please select your locality. Press 1 for Virudhunagar Town, 2 for Aruppukkottai, 3 for Sattur, 4 for Sivakasi, 5 for Rajapalayam, or 6 for Srivilliputhur.`,
                 bargeIn: true
             },
             {
@@ -75,13 +75,14 @@ const handleIVRZone = async (req, res) => {
     let session = getSession(phone);
 
     if (session) {
-        session.zone = `Zone ${digits}`;
+        const localityInfo = wardMap[digits];
+        session.zone = localityInfo?.zone || `Zone ${digits}`;
         setSession(phone, session);
         
         const ncco = [
             {
                 action: 'talk',
-                text: `Zone ${digits} confirmed. Now please enter your ward number from 1 to 5.`,
+                text: `${session.zone} confirmed. Now please enter your ward number or press 1 to continue.`,
                 bargeIn: true
             },
             {
