@@ -21,23 +21,45 @@ router.post('/whatsapp/inbound', async (req, res) => {
 
     try {
         const data = req.body;
+        console.log(`[Webhook Debug] Raw WhatsApp Data:`, JSON.stringify(data));
         
-        // Skip status updates (delivery receipts, read receipts, etc.)
-        if (!data.from || !data.message) {
+        // Skip status updates (they don't have text or message object)
+        if (!data.from) {
             return;
         }
 
-        const phone = data.from.number || '';
-        const messageContent = data.message.content || {};
+        // Handle string format (standard Vonage Sandbox) vs object format
+        const phone = typeof data.from === 'object' ? (data.from.number || '') : (data.from || '');
         
+        // Handle various Message body formats
+        let bodyText = data.text || '';
+        let mediaUrl = data.image?.url || data.image || null;
+        let lat = data.location?.lat || null;
+        let long = data.location?.long || null;
+        let msgType = data.message_type || 'text';
+
+        // Fallback or old format support
+        if (data.message && data.message.content) {
+            bodyText = data.message.content.text || bodyText;
+            mediaUrl = data.message.content.image?.url || mediaUrl;
+            lat = data.message.content.location?.lat || lat;
+            long = data.message.content.location?.long || long;
+            msgType = data.message.content.type || msgType;
+        }
+        
+        // If there's absolutely no text or media, ignore
+        if (!bodyText && !mediaUrl) {
+           return;
+        }
+
         // Normalize incoming data into a simpler format our handlers understand
         const normalized = {
             phone: phone,
-            body: messageContent.text || '',
-            mediaUrl: messageContent.image?.url || null,
-            latitude: messageContent.location?.lat || null,
-            longitude: messageContent.location?.long || null,
-            messageType: messageContent.type || 'text'
+            body: bodyText,
+            mediaUrl: mediaUrl,
+            latitude: lat,
+            longitude: long,
+            messageType: msgType
         };
 
         // 1. Identify: Is this a Worker or a Citizen?
