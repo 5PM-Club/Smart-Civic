@@ -7,6 +7,8 @@ const { generateTicketId } = require('../utils/ticketId');
 const { dispatchComplaint } = require('../services/dispatchService');
 const { sendMessage } = require('../utils/notify');
 
+const { getTranslation } = require('../utils/translations');
+
 /**
  * Handles incoming messages from citizens (WhatsApp or SMS).
  * @param {Object} msg - Normalized message { phone, body, mediaUrl, latitude, longitude, messageType, channel }
@@ -29,23 +31,35 @@ const handleWhatsApp = async (msg) => {
 
         const newSession = { state: 'AWAIT_LANGUAGE', citizen_id: citizen.id, channel: channel || 'whatsapp' };
         setSession(phone, newSession);
-        await sendMessage(phone, "Welcome to Smart Civic Reporting! 🇮🇳\nPlease select your preferred language:\n1. English\n2. Hindi\n3. Local Language", newSession.channel);
+        
+        // Initial welcome always invites language choice in English/Tamil/Hindi mix
+        await sendMessage(phone, getTranslation('en', 'welcome'), newSession.channel);
         return;
     }
 
+    const t = (key, params) => getTranslation(session.lang, key, params);
+
     switch (session.state) {
         case 'AWAIT_LANGUAGE': {
-            const langMap = { '1': 'en', '2': 'hi', '3': 'local' };
+            // New Requested Order: 1. Tamil, 2. English, 3. Hindi
+            const langMap = { '1': 'ta', '2': 'en', '3': 'hi' };
             const lang = langMap[text];
             if (lang) {
                 await supabase.from('citizens').update({ preferred_language: lang }).eq('id', session.citizen_id);
                 session.state = 'AWAIT_CATEGORY';
                 session.lang = lang;
                 setSession(phone, session);
-                await sendMessage(phone, "Great! Now, what is the category of your complaint?\n" + 
-                    Object.keys(categories).map((c, i) => `${i+1}. ${categories[c].name}`).join('\n'), session.channel);
+                
+                // Show translated category list
+                const catList = Object.keys(categories).map((c, i) => {
+                    const catName = lang === 'ta' ? categories[c].name_ta : (lang === 'hi' ? categories[c].name_hi : categories[c].name);
+                    return `${i+1}. ${catName}`;
+                }).join('\n');
+                
+                await sendMessage(phone, t('cat_prompt') + catList, session.channel);
             } else {
-                await sendMessage(phone, "Please reply with 1, 2, or 3.", session.channel);
+                // Use English as fallback for error if lang not yet chosen
+                await sendMessage(phone, getTranslation('en', 'invalid_lang'), session.channel);
             }
             break;
         }
@@ -56,18 +70,21 @@ const handleWhatsApp = async (msg) => {
             const selectedCat = catKeys[index];
             if (selectedCat) {
                 session.category = selectedCat;
+                const lang = session.lang;
+                const catName = lang === 'ta' ? categories[selectedCat].name_ta : (lang === 'hi' ? categories[selectedCat].name_hi : categories[selectedCat].name);
+
                 // Branch: SMS doesn't support easy photos
                 if (session.channel === 'sms') {
                     session.state = 'AWAIT_LOCATION';
                     setSession(phone, session);
-                    await sendMessage(phone, `Got it: ${categories[selectedCat].name}. Please type your Ward/Area name.`, session.channel);
+                    await sendMessage(phone, t('location_prompt'), session.channel);
                 } else {
                     session.state = 'AWAIT_PHOTO';
                     setSession(phone, session);
-                    await sendMessage(phone, `Got it: ${categories[selectedCat].name}. Please send a PHOTO of the issue, or reply 'SKIP'.`, session.channel);
+                    await sendMessage(phone, t('photo_prompt', { category: catName }), session.channel);
                 }
             } else {
-                await sendMessage(phone, "Invalid choice. Please select a number from the list.", session.channel);
+                await sendMessage(phone, t('invalid_cat'), session.channel);
             }
             break;
         }
@@ -76,7 +93,7 @@ const handleWhatsApp = async (msg) => {
             if (mediaUrl) session.photo_url = mediaUrl;
             session.state = 'AWAIT_LOCATION';
             setSession(phone, session);
-            await sendMessage(phone, "Please SEND YOUR LIVE LOCATION (GPS) so we can dispatch workers accurately. Or type your Ward/Area name.", session.channel);
+            await sendMessage(phone, t('location_prompt'), session.channel);
             break;
         }
 
@@ -85,13 +102,15 @@ const handleWhatsApp = async (msg) => {
                 session.lat = latitude;
                 session.lng = longitude;
                 session.location_source = 'gps';
-            } else {
-                session.address_ward = text;
-                session.location_source = 'text';
             }
+            if (text && text.length > 2 && text.toLowerCase() !== 'skip') {
+                session.address_ward = text;
+                session.location_source = session.location_source === 'gps' ? 'gps+text' : 'text';
+            }
+            
             session.state = 'AWAIT_DESCRIPTION';
             setSession(phone, session);
-            await sendMessage(phone, "Almost done! Please provide a brief description of the problem.", session.channel);
+            await sendMessage(phone, t('description_prompt'), session.channel);
             break;
         }
 
@@ -119,22 +138,19 @@ const handleWhatsApp = async (msg) => {
                 location_source: session.location_source || 'unknown',
                 citizen_id: session.citizen_id,
                 department_id: departmentId,
-                channel: session.channel, // Use actual channel used
+                channel: session.channel,
                 sla_deadline: slaDeadline.toISOString(),
                 status: 'open'
             }]).select().single();
 
             if (error) {
-                await sendMessage(phone, "Sorry, there was an error saving your complaint. Please try again.", session.channel);
+                await sendMessage(phone, "Error Saving / பிழை ஏற்பட்டது.", session.channel);
             } else {
-                await sendMessage(phone, `Thank you! Your complaint has been registered.\nTicket ID: ${ticketId}\nStatus: OPEN\nWe will notify you once a worker is assigned.`, session.channel);
+                await sendMessage(phone, t('success', { ticketId }), session.channel);
                 
                 try {
                     supabase.rpc('increment_complaint_count', { citizen_id_param: session.citizen_id }).then().catch(()=>{});
                 } catch (e) {}
-                
-                // Auto-Dispatch disabled (manual assignment only)
-                // dispatchComplaint(complaint.id);
             }
             
             clearSession(phone);
@@ -143,7 +159,7 @@ const handleWhatsApp = async (msg) => {
 
         default:
             clearSession(phone);
-            await sendMessage(phone, "Session expired. Please say 'Hi' to start again.", session.channel || 'whatsapp');
+            await sendMessage(phone, getTranslation('en', 'expired'), session.channel || 'whatsapp');
             break;
     }
 };

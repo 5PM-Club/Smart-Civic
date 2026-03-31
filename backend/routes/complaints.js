@@ -145,7 +145,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-const { sendMessage } = require('../utils/notify');
+const { getTranslation } = require('../utils/translations');
+const { categories } = require('../utils/categoryDeptMap');
 
 // PATCH /api/complaints/:id/status
 router.patch('/:id/status', async (req, res) => {
@@ -160,19 +161,27 @@ router.patch('/:id/status', async (req, res) => {
             .from('complaints')
             .update(updates)
             .eq('id', id)
-            .select('*, citizens(phone), workers(name, phone)')
+            .select('*, citizens(phone, preferred_language), workers(name, phone)')
             .single();
 
         if (error) throw error;
 
         // If a worker is being assigned, notify both the worker and the citizen
         if (worker_id && complaint.workers && complaint.citizens) {
-            // 1. Notify Worker
+            const lang = complaint.citizens.preferred_language || 'en';
+            const cat = categories[complaint.category];
+            const localizedCatName = lang === 'ta' ? cat?.name_ta : (lang === 'hi' ? cat?.name_hi : cat?.name);
+
+            // 1. Notify Worker (Always English for admin technical details)
             const workerMsg = `Hello ${complaint.workers.name}! A new ticket ${complaint.ticket_id} has been assigned to you.\nCategory: ${complaint.category}\nLocation: ${complaint.address_ward || 'N/A'}\nDescription: ${complaint.description}\nPlease resolve this within the SLA deadline.`;
             await sendMessage(complaint.workers.phone, workerMsg, 'whatsapp', complaint.photo_url);
 
-            // 2. Notify Citizen
-            const citizenMsg = `Update: A worker (${complaint.workers.name}) has been assigned to your complaint ${complaint.ticket_id}. They will contact you if needed.`;
+            // 2. Notify Citizen (In their preferred language)
+            const citizenMsg = getTranslation(lang, 'worker_assigned', {
+                workerName: complaint.workers.name,
+                category: localizedCatName || complaint.category,
+                ticketId: complaint.ticket_id
+            });
             await sendMessage(complaint.citizens.phone, citizenMsg, complaint.channel || 'whatsapp');
 
             // 3. Update Worker Availability
