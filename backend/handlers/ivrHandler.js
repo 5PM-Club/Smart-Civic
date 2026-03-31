@@ -14,124 +14,92 @@ const { dispatchComplaint } = require('../services/dispatchService');
  */
 
 const handleIVR = async (req, res) => {
-    // Vonage NCCO: Talk + Input (replaces twiml.gather + twiml.say)
-    const ncco = [
-        {
-            action: 'talk',
-            text: 'Welcome to Smart Civic platform. Please select the category of your complaint. Press 1 for Garbage collection, 2 for Pothole repair, 3 for Drainage overflow, 4 for Water pipe leak, or 5 for Streetlight faults.',
-            bargeIn: true
-        },
-        {
-            action: 'input',
-            type: ['dtmf'],
-            dtmf: { maxDigits: 1, timeOut: 10 },
-            eventUrl: [`${getBaseUrl(req)}/webhook/ivr/category`]
-        }
-    ];
-    
-    res.json(ncco);
+    // Exotel expects XML (ExoML)
+    res.set('Content-Type', 'text/xml');
+    res.send(`
+        <Response>
+            <Play>https://smart-civic.com/audio/welcome.mp3</Play>
+            <Gather action="${getBaseUrl(req)}/webhook/ivr/category" numDigits="1" timeout="10">
+                <Say>Welcome to Smart Civic. Press 1 for Garbage, 2 for Pothole, 3 for Drainage, 4 for Water leak, or 5 for Streetlight.</Say>
+            </Gather>
+        </Response>
+    `);
 };
 
 const handleIVRCategory = async (req, res) => {
-    const digits = req.body.dtmf?.digits || req.body.Digits || '';
-    const phone = req.body.from || req.body.From || '';
-
-    console.log(`[IVR DEBUG] Received digits: ${digits} from ${phone}`);
+    const digits = req.body.digits || req.body.Digits || '';
+    const phone = req.body.From || req.body.from || '';
 
     const map = { '1': 'garbage', '2': 'pothole', '3': 'drainage', '4': 'water_leak', '5': 'streetlight' };
     const category = map[digits];
 
+    res.set('Content-Type', 'text/xml');
     if (category) {
         setSession(phone, { state: 'IVR_ZONE', category });
-        
-        const ncco = [
-            {
-                action: 'talk',
-                text: `You have selected ${category.replace('_', ' ')}. Please select your zone. Press 1 for Zone 1, 2 for Zone 2, 3 for Zone 3.`,
-                bargeIn: true
-            },
-            {
-                action: 'input',
-                type: ['dtmf'],
-                dtmf: { maxDigits: 1 },
-                eventUrl: [`${getBaseUrl(req)}/webhook/ivr/zone`]
-            }
-        ];
-        
-        res.json(ncco);
+        res.send(`
+            <Response>
+                <Gather action="${getBaseUrl(req)}/webhook/ivr/zone" numDigits="1">
+                    <Say>You selected ${category.replace('_', ' ')}. Press 1 for Zone 1, 2 for Zone 2, 3 for Zone 3.</Say>
+                </Gather>
+            </Response>
+        `);
     } else {
-        console.log(`[IVR DEBUG] Invalid selection: ${digits}`);
-        const ncco = [
-            { action: 'talk', text: 'Sorry, I did not understand that selection.' },
-            { action: 'input', type: ['dtmf'], dtmf: { maxDigits: 1, timeOut: 10 }, eventUrl: [`${getBaseUrl(req)}/webhook/ivr`] }
-        ];
-        res.json(ncco);
+        res.send(`
+            <Response>
+                <Say>Invalid selection.</Say>
+                <Redirect>${getBaseUrl(req)}/webhook/ivr</Redirect>
+            </Response>
+        `);
     }
 };
 
 const handleIVRZone = async (req, res) => {
-    const digits = req.body.dtmf?.digits || req.body.Digits || '';
-    const phone = req.body.from || req.body.From || '';
+    const digits = req.body.digits || req.body.Digits || '';
+    const phone = req.body.From || req.body.from || '';
     let session = getSession(phone);
 
+    res.set('Content-Type', 'text/xml');
     if (session) {
         session.zone = `Zone ${digits}`;
         setSession(phone, session);
-        
-        const ncco = [
-            {
-                action: 'talk',
-                text: `Zone ${digits} confirmed. Now please enter your ward number from 1 to 5.`,
-                bargeIn: true
-            },
-            {
-                action: 'input',
-                type: ['dtmf'],
-                dtmf: { maxDigits: 1 },
-                eventUrl: [`${getBaseUrl(req)}/webhook/ivr/ward`]
-            }
-        ];
-        
-        res.json(ncco);
+        res.send(`
+            <Response>
+                <Gather action="${getBaseUrl(req)}/webhook/ivr/ward" numDigits="1">
+                    <Say>Zone ${digits} confirmed. Please enter your ward number from 1 to 5.</Say>
+                </Gather>
+            </Response>
+        `);
     } else {
-        res.json([{ action: 'talk', text: 'Session expired. Please call again.' }]);
+        res.send(`<Response><Say>Session expired.</Say></Response>`);
     }
 };
 
 const handleIVRWard = async (req, res) => {
-    const digits = req.body.dtmf?.digits || req.body.Digits || '';
-    const phone = req.body.from || req.body.From || '';
+    const digits = req.body.digits || req.body.Digits || '';
+    const phone = req.body.From || req.body.from || '';
     let session = getSession(phone);
 
+    res.set('Content-Type', 'text/xml');
     if (session) {
         session.ward = `Ward ${digits}`;
         setSession(phone, session);
-
-        const ncco = [
-            {
-                action: 'talk',
-                text: 'Thank you. After the beep, please state the exact location and a brief description of the issue. Press any key or stay silent when finished.'
-            },
-            {
-                action: 'record',
-                eventUrl: [`${getBaseUrl(req)}/webhook/ivr/recording`],
-                endOnKey: '*',
-                endOnSilence: 3,
-                beepStart: true
-            }
-        ];
-        
-        res.json(ncco);
+        res.send(`
+            <Response>
+                <Say>Thank you. After the beep, please state the location. Press hash when finished.</Say>
+                <Record action="${getBaseUrl(req)}/webhook/ivr/recording" maxLength="30" finishOnKey="#" />
+            </Response>
+        `);
     } else {
-        res.json([{ action: 'talk', text: 'Session expired. Please call again.' }]);
+        res.send(`<Response><Say>Session expired.</Say></Response>`);
     }
 };
 
 const handleIVRRecording = async (req, res) => {
-    const phone = req.body.from || req.body.From || '';
-    const recordingUrl = req.body.recording_url || req.body.RecordingUrl || '';
+    const phone = req.body.From || req.body.from || '';
+    const recordingUrl = req.body.RecordingUrl || req.body.recording_url || '';
     let session = getSession(phone);
 
+    res.set('Content-Type', 'text/xml');
     if (session) {
         const ticketId = generateTicketId();
         const addressWard = `${session.zone}, ${session.ward}`;
@@ -147,7 +115,7 @@ const handleIVRRecording = async (req, res) => {
         const { data: dept } = await supabase.from('departments').select('id').eq('name', deptName).single();
         if (dept) departmentId = dept.id;
 
-        const { data: complaint, error: insertErr } = await supabase.from('complaints').insert([{
+        await supabase.from('complaints').insert([{
             ticket_id: ticketId,
             category: session.category,
             description: `Voice Recording: ${recordingUrl}`,
@@ -157,22 +125,17 @@ const handleIVRRecording = async (req, res) => {
             department_id: departmentId,
             sla_deadline: getSLADeadline(24).toISOString(),
             status: 'open'
-        }]).select().single();
-
-        if (!insertErr && complaint) {
-            try {
-                await supabase.rpc('increment_complaint_count', { citizen_id_param: citizen.id });
-            } catch (rpcErr) {
-                console.log('[RPC FALLBACK] Updating count manually.');
-            }
-            // Auto-Dispatch disabled (manual assignment only)
-            // dispatchComplaint(complaint.id);
-        }
+        }]);
 
         clearSession(phone);
-        res.json([{ action: 'talk', text: 'Thank you. Your complaint has been registered. Your ticket ID is being sent to you via SMS. Goodbye.' }]);
+        res.send(`
+            <Response>
+                <Say>Your complaint has been registered. Your ticket ID is ${ticketId}. Goodbye.</Say>
+                <Hangup />
+            </Response>
+        `);
     } else {
-        res.json([{ action: 'talk', text: 'Sorry, your session expired. Goodbye.' }]);
+        res.send(`<Response><Say>Sorry, session expired.</Say></Response>`);
     }
 };
 

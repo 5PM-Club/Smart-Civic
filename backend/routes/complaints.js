@@ -162,10 +162,17 @@ router.patch('/:id/status', async (req, res) => {
             .from('complaints')
             .update(updates)
             .eq('id', id)
-            .select('*, citizens(phone, preferred_language), workers(name, phone)')
+            .select('*, citizens:citizen_id(phone, preferred_language), workers:worker_id(name, phone)')
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error(`[Status Update Error] ID: ${id}, Error:`, error);
+            throw error;
+        }
+
+        console.log(`[Status Debug] Update successful for Ticket: ${complaint.ticket_id}`);
+        console.log(`[Status Debug] Citizen:`, JSON.stringify(complaint.citizens));
+        console.log(`[Status Debug] Worker:`, JSON.stringify(complaint.workers));
 
         // If a worker is being assigned, notify both the worker and the citizen
         if (worker_id && complaint.workers && complaint.citizens) {
@@ -175,6 +182,7 @@ router.patch('/:id/status', async (req, res) => {
 
             // 1. Notify Worker (Always English for admin technical details)
             const workerMsg = `Hello ${complaint.workers.name}! A new ticket ${complaint.ticket_id} has been assigned to you.\nCategory: ${complaint.category}\nLocation: ${complaint.address_ward || 'N/A'}\nDescription: ${complaint.description}\nPlease resolve this within the SLA deadline.`;
+            console.log(`[Notification] Sending to Worker: ${complaint.workers.phone}`);
             await sendMessage(complaint.workers.phone, workerMsg, 'whatsapp', complaint.photo_url);
 
             // 2. Notify Citizen (In their preferred language)
@@ -183,6 +191,7 @@ router.patch('/:id/status', async (req, res) => {
                 category: localizedCatName || complaint.category,
                 ticketId: complaint.ticket_id
             });
+            console.log(`[Notification] Sending to Citizen (${lang}): ${complaint.citizens.phone}`);
             await sendMessage(complaint.citizens.phone, citizenMsg, complaint.channel || 'whatsapp');
 
             // 3. Update Worker Availability
@@ -191,7 +200,24 @@ router.patch('/:id/status', async (req, res) => {
 
         // If marked as resolved by admin, notify the citizen
         if (status === 'resolved' && complaint.citizens && complaint.citizens.phone) {
-            const message = `Update: Your complaint ${complaint.ticket_id} has been marked as RESOLVED by the administration. Thank you for using Smart Civic.`;
+            const lang = complaint.citizens.preferred_language || 'en';
+            
+            // Check for Rewards (Green Badge)
+            const { data: citizen } = await supabase.from('citizens').select('complaint_count, has_badge').eq('id', complaint.citizen_id).single();
+            const threshold = parseInt(process.env.BADGE_THRESHOLD || '5');
+            let rewardMsg = '';
+            
+            if (citizen && citizen.complaint_count >= threshold && !citizen.has_badge) {
+                await supabase.from('citizens').update({ has_badge: true }).eq('id', complaint.citizen_id);
+                rewardMsg = `\n\n🎉 ${lang === 'ta' ? 'வாழ்த்துக்கள்! நீங்கள் "சமூக உதவியாளர் பச்சை பேட்ஜ்" வென்றுள்ளீர்கள்.' : 'Congratulations! You have earned the Community Helper Green Badge.'}`;
+            }
+
+            const message = getTranslation(lang, 'status_update', { 
+                ticketId: complaint.ticket_id, 
+                status: lang === 'ta' ? 'தீர்க்கப்பட்டது (RESOLVED)' : 'RESOLVED' 
+            }) + rewardMsg;
+
+            console.log(`[Notification] Sending Resolution to Citizen: ${complaint.citizens.phone}`);
             await sendMessage(complaint.citizens.phone, message, complaint.channel || 'whatsapp');
         }
 
