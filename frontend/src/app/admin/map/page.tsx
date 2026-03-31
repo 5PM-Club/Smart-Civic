@@ -5,7 +5,7 @@ import { Filter, Search, Map as MapIcon, Layers, Loader2, MapPin } from "lucide-
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
 import { fetchAPI } from "@/lib/api";
 
-const COIMBATORE_CENTER = { lat: 11.0168, lng: 76.9558 };
+const VIRUDHUNAGAR_CENTER = { lat: 9.5872, lng: 77.9514 };
 
 const mapContainerStyle = {
   width: '100%',
@@ -113,8 +113,8 @@ export default function MapView() {
     <div className="space-y-6 pt-6 min-h-[calc(100vh-64px)] selection:bg-orange-500 selection:text-white flex flex-col">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">Live Coimbatore Map</h1>
-            <p className="text-slate-400 mt-1 font-medium italic">Real-time civic monitoring for Coimbatore Municipality</p>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">Live Virudhunagar Map</h1>
+            <p className="text-slate-400 mt-1 font-medium italic">Real-time civic monitoring for Virudhunagar Municipality</p>
         </div>
         <div className="flex bg-slate-900 rounded-xl border border-slate-800 p-1 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
             <button 
@@ -147,11 +147,11 @@ export default function MapView() {
                 </select>
                 <select value={filterWard} onChange={(e) => setFilterWard(e.target.value)} className="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500/50 font-semibold cursor-pointer">
                     <option>All Localities</option>
-                    <option>Gandhipuram</option>
-                    <option>RS Puram</option>
-                    <option>Peelamedu</option>
-                    <option>Singanallur</option>
-                    <option>Saibaba Colony</option>
+                    <option>Virudhunagar Town</option>
+                    <option>Aruppukottai</option>
+                    <option>Sathur</option>
+                    <option>Sivakasi</option>
+                    <option>Rajapalayam</option>
                 </select>
                 <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500/50 font-semibold cursor-pointer">
                     <option>All Statuses</option>
@@ -162,7 +162,7 @@ export default function MapView() {
             
             <div className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-4 py-2 rounded-xl text-sm font-bold flex items-center space-x-2 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
                 <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
-                <span>{openCount} Active Complaints in Coimbatore</span>
+                <span>{openCount} Active Complaints in Virudhunagar</span>
             </div>
         </div>
 
@@ -171,7 +171,7 @@ export default function MapView() {
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={{ width: '100%', height: '650px' }}
-                center={COIMBATORE_CENTER}
+                center={VIRUDHUNAGAR_CENTER}
                 zoom={13}
                 options={darkMapOptions}
                 mapTypeId={mapTypeId}
@@ -198,7 +198,7 @@ export default function MapView() {
                       <h4 className="font-black text-slate-900 capitalize">{selectedPin.category}</h4>
                       <p className="text-xs mt-1 font-medium text-slate-600 line-clamp-2">{selectedPin.description}</p>
                       <div className="mt-3 pt-2 border-t border-slate-100 flex items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        <MapPin size={10} className="mr-1" /> {selectedPin.address_ward || "Coimbatore Locality"}
+                        <MapPin size={10} className="mr-1" /> {selectedPin.address_ward || "Virudhunagar Locality"}
                       </div>
                     </div>
                   </InfoWindow>

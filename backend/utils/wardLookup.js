@@ -5,11 +5,11 @@
  */
 
 const wardMap = {
-    "1": { zone: "Zone 1", ward: "Ward 1" },
-    "2": { zone: "Zone 1", ward: "Ward 2" },
-    "3": { zone: "Zone 2", ward: "Ward 3" },
-    "4": { zone: "Zone 2", ward: "Ward 4" },
-    "5": { zone: "Zone 3", ward: "Ward 5" },
+    "1": { zone: "Virudhunagar", ward: "Town Ward 1" },
+    "2": { zone: "Aruppukottai", ward: "Ward 1" },
+    "3": { zone: "Sathur", ward: "Ward 1" },
+    "4": { zone: "Sivakasi", ward: "Ward 1" },
+    "5": { zone: "Rajapalayam", ward: "Ward 1" },
 };
 
 const resolveLocation = (input) => {
@@ -20,9 +20,10 @@ const resolveLocation = (input) => {
     
     // Fallback for keyword-based search
     const lowerInput = input.toLowerCase();
-    if (lowerInput.includes('pincode 110001')) return { zone: 'New Delhi', ward: 'Ward 01' };
+    if (lowerInput.includes('aruppukottai')) return { zone: 'Aruppukottai', ward: 'Main' };
+    if (lowerInput.includes('sathur')) return { zone: 'Sathur', ward: 'Main' };
     
-    return null;
+    return { zone: 'Virudhunagar', ward: 'General' };
 };
 
 module.exports = { wardMap, resolveLocation };
