@@ -7,6 +7,7 @@ const { categories, getDeptForCategory } = require('../utils/categoryDeptMap');
 const { generateTicketId } = require('../utils/ticketId');
 const { getSLADeadline } = require('../utils/slaHelper');
 const { dispatchComplaint } = require('../services/dispatchService');
+const { sendMessage } = require('../utils/notify');
 
 /**
  * Vonage Voice uses NCCO (JSON arrays) instead of Twilio's TwiML (XML).
