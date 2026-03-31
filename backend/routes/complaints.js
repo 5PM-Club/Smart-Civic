@@ -126,8 +126,8 @@ router.post('/', async (req, res) => {
 
         if (error) throw error;
 
-        // Trigger Auto-Dispatch
-        dispatchComplaint(complaint.id);
+        // Auto-Dispatch disabled (manual assignment only)
+        // dispatchComplaint(complaint.id);
 
         // Increment citizen complaint count
         try {
@@ -160,10 +160,24 @@ router.patch('/:id/status', async (req, res) => {
             .from('complaints')
             .update(updates)
             .eq('id', id)
-            .select('*, citizens(phone)')
+            .select('*, citizens(phone), workers(name, phone)')
             .single();
 
         if (error) throw error;
+
+        // If a worker is being assigned, notify both the worker and the citizen
+        if (worker_id && complaint.workers && complaint.citizens) {
+            // 1. Notify Worker
+            const workerMsg = `Hello ${complaint.workers.name}! A new ticket ${complaint.ticket_id} has been assigned to you.\nCategory: ${complaint.category}\nLocation: ${complaint.address_ward || 'N/A'}\nDescription: ${complaint.description}\nPlease resolve this within the SLA deadline.`;
+            await sendMessage(complaint.workers.phone, workerMsg, 'whatsapp', complaint.photo_url);
+
+            // 2. Notify Citizen
+            const citizenMsg = `Update: A worker (${complaint.workers.name}) has been assigned to your complaint ${complaint.ticket_id}. They will contact you if needed.`;
+            await sendMessage(complaint.citizens.phone, citizenMsg, complaint.channel || 'whatsapp');
+
+            // 3. Update Worker Availability
+            await supabase.from('workers').update({ is_available: false }).eq('id', worker_id);
+        }
 
         // If marked as resolved by admin, notify the citizen
         if (status === 'resolved' && complaint.citizens && complaint.citizens.phone) {

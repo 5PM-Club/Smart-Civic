@@ -133,8 +133,8 @@ const handleWhatsApp = async (msg) => {
                     supabase.rpc('increment_complaint_count', { citizen_id_param: session.citizen_id }).then().catch(()=>{});
                 } catch (e) {}
                 
-                // Trigger Auto-Dispatch
-                dispatchComplaint(complaint.id);
+                // Auto-Dispatch disabled (manual assignment only)
+                // dispatchComplaint(complaint.id);
             }
             
             clearSession(phone);

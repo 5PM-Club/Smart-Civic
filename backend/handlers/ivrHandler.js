@@ -165,7 +165,8 @@ const handleIVRRecording = async (req, res) => {
             } catch (rpcErr) {
                 console.log('[RPC FALLBACK] Updating count manually.');
             }
-            dispatchComplaint(complaint.id);
+            // Auto-Dispatch disabled (manual assignment only)
+            // dispatchComplaint(complaint.id);
         }
 
         clearSession(phone);
