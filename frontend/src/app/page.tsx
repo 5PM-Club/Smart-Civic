@@ -78,11 +78,12 @@ export default function Home() {
     try {
       // Auto-geocode based on selected locality if GPS is off
       const LOCALITY_COORDS: Record<string, {lat: number, lng: number}> = {
-        "Gandhipuram": {lat: 11.0183, lng: 76.9660},
-        "RS Puram": {lat: 11.0084, lng: 76.9496},
-        "Peelamedu": {lat: 11.0261, lng: 77.0028},
-        "Singanallur": {lat: 10.9926, lng: 77.0270},
-        "Saibaba Colony": {lat: 11.0253, lng: 76.9427}
+        "Virudhunagar Town": {lat: 9.5872, lng: 77.9514},
+        "Sivakasi": {lat: 9.4533, lng: 77.7925},
+        "Rajapalayam": {lat: 9.4526, lng: 77.5539},
+        "Srivilliputhur": {lat: 9.5088, lng: 77.6322},
+        "Aruppukkottai": {lat: 9.5135, lng: 78.0988},
+        "Sattur": {lat: 9.3562, lng: 77.9250}
       };
 
       let finalLat = formData.lat;
@@ -262,11 +263,12 @@ export default function Home() {
                     </select>
                     <select required value={formData.ward} onChange={(e) => setFormData({...formData, ward: e.target.value})} className="w-full px-4 py-3.5 rounded-xl border border-slate-800 bg-slate-950 text-white focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 outline-none transition-all shadow-inner">
                         <option value="" disabled>Select Locality</option>
-                        <option>Gandhipuram</option>
-                        <option>RS Puram</option>
-                        <option>Peelamedu</option>
-                        <option>Singanallur</option>
-                        <option>Saibaba Colony</option>
+                        <option>Virudhunagar Town</option>
+                        <option>Sivakasi</option>
+                        <option>Rajapalayam</option>
+                        <option>Srivilliputhur</option>
+                        <option>Aruppukkottai</option>
+                        <option>Sattur</option>
                     </select>
                     <input type="text" value={formData.locality} onChange={(e) => setFormData({...formData, locality: e.target.value})} placeholder="Street / Landmark" className="w-full px-4 py-3.5 rounded-xl border border-slate-800 bg-slate-950 text-white focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 outline-none transition-all shadow-inner" />
                 </div>

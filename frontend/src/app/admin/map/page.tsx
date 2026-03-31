@@ -148,10 +148,11 @@ export default function MapView() {
                 <select value={filterWard} onChange={(e) => setFilterWard(e.target.value)} className="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500/50 font-semibold cursor-pointer">
                     <option>All Localities</option>
                     <option>Virudhunagar Town</option>
-                    <option>Aruppukottai</option>
-                    <option>Sathur</option>
+                    <option>Aruppukkottai</option>
+                    <option>Sattur</option>
                     <option>Sivakasi</option>
                     <option>Rajapalayam</option>
+                    <option>Srivilliputhur</option>
                 </select>
                 <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-orange-500/50 font-semibold cursor-pointer">
                     <option>All Statuses</option>
