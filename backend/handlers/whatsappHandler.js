@@ -1,35 +1,35 @@
-const { sendMessage } = require('../utils/notify');
+// backend/handlers/whatsappHandler.js — Vonage-based Citizen WhatsApp Handler
+const supabase = require('../config/supabase');
+const { getSession, setSession, clearSession } = require('../utils/sessionStore');
+const { categories, getDeptForCategory } = require('../utils/categoryDeptMap');
+const { getSLADeadline } = require('../utils/slaHelper');
+const { generateTicketId } = require('../utils/ticketId');
+const { dispatchComplaint } = require('../services/dispatchService');
+const { sendWhatsApp } = require('../utils/notify');
 
 /**
- * Handles incoming WhatsApp/SMS messages from citizens.
- * @param {Object} msg - Normalized message { phone, body, mediaUrl, latitude, longitude, messageType, channel }
+ * Handles incoming WhatsApp messages from citizens.
+ * @param {Object} msg - Normalized message { phone, body, mediaUrl, latitude, longitude, messageType }
  */
 const handleWhatsApp = async (msg) => {
-    const { phone, body, mediaUrl, latitude, longitude, channel: msgChannel } = msg;
+    const { phone, body, mediaUrl, latitude, longitude } = msg;
     const text = (body || '').trim();
 
     let session = getSession(phone);
-    const channel = msgChannel || session?.channel || 'whatsapp';
 
     // Initial greeting if no session
     if (!session) {
         // Upsert citizen
-        const phoneFormatted = phone.startsWith('+') ? phone : `+${phone}`;
-        let { data: citizen } = await supabase.from('citizens').select('*').eq('phone', phoneFormatted).single();
+        let { data: citizen } = await supabase.from('citizens').select('*').eq('phone', phone.startsWith('+') ? phone : `+${phone}`).single();
         if (!citizen) {
+            const phoneFormatted = phone.startsWith('+') ? phone : `+${phone}`;
             const { data: newCitizen } = await supabase.from('citizens').insert([{ phone: phoneFormatted }]).select().single();
             citizen = newCitizen;
         }
 
-        setSession(phone, { state: 'AWAIT_LANGUAGE', citizen_id: citizen.id, channel });
-        await sendMessage(phone, "Welcome to Smart Civic Reporting! 🇮🇳\nPlease select your preferred language:\n1. English\n2. Hindi\n3. Local Language", channel);
+        setSession(phone, { state: 'AWAIT_LANGUAGE', citizen_id: citizen.id });
+        await sendWhatsApp(phone, "Welcome to Smart Civic Reporting! 🇮🇳\nPlease select your preferred language:\n1. English\n2. Hindi\n3. Local Language");
         return;
-    }
-
-    // Ensure channel is tracked
-    if (!session.channel) {
-        session.channel = channel;
-        setSession(phone, session);
     }
 
     switch (session.state) {
@@ -41,10 +41,10 @@ const handleWhatsApp = async (msg) => {
                 session.state = 'AWAIT_CATEGORY';
                 session.lang = lang;
                 setSession(phone, session);
-                await sendMessage(phone, "Great! Now, what is the category of your complaint?\n" + 
-                    Object.keys(categories).map((c, i) => `${i+1}. ${categories[c].name}`).join('\n'), channel);
+                await sendWhatsApp(phone, "Great! Now, what is the category of your complaint?\n" + 
+                    Object.keys(categories).map((c, i) => `${i+1}. ${categories[c].name}`).join('\n'));
             } else {
-                await sendMessage(phone, "Please reply with 1, 2, or 3.", channel);
+                await sendWhatsApp(phone, "Please reply with 1, 2, or 3.");
             }
             break;
         }
@@ -55,18 +55,11 @@ const handleWhatsApp = async (msg) => {
             const selectedCat = catKeys[index];
             if (selectedCat) {
                 session.category = selectedCat;
-                // SMS doesn't support photos easily in this prototype, skip to location
-                if (channel === 'sms') {
-                    session.state = 'AWAIT_LOCATION';
-                    setSession(phone, session);
-                    await sendMessage(phone, `Got it: ${categories[selectedCat].name}. Please type your Ward/Area name.`, channel);
-                } else {
-                    session.state = 'AWAIT_PHOTO';
-                    setSession(phone, session);
-                    await sendMessage(phone, `Got it: ${categories[selectedCat].name}. Please send a PHOTO of the issue, or reply 'SKIP'.`, channel);
-                }
+                session.state = 'AWAIT_PHOTO';
+                setSession(phone, session);
+                await sendWhatsApp(phone, `Got it: ${categories[selectedCat].name}. Please send a PHOTO of the issue, or reply 'SKIP'.`);
             } else {
-                await sendMessage(phone, "Invalid choice. Please select a number from the list.", channel);
+                await sendWhatsApp(phone, "Invalid choice. Please select a number from the list.");
             }
             break;
         }
@@ -75,7 +68,7 @@ const handleWhatsApp = async (msg) => {
             if (mediaUrl) session.photo_url = mediaUrl;
             session.state = 'AWAIT_LOCATION';
             setSession(phone, session);
-            await sendMessage(phone, "Please SEND YOUR LIVE LOCATION (GPS) so we can dispatch workers accurately. Or type your Ward/Area name.", channel);
+            await sendWhatsApp(phone, "Please SEND YOUR LIVE LOCATION (GPS) so we can dispatch workers accurately. Or type your Ward/Area name.");
             break;
         }
 
@@ -90,7 +83,7 @@ const handleWhatsApp = async (msg) => {
             }
             session.state = 'AWAIT_DESCRIPTION';
             setSession(phone, session);
-            await sendMessage(phone, "Almost done! Please provide a brief description of the problem.", channel);
+            await sendWhatsApp(phone, "Almost done! Please provide a brief description of the problem.");
             break;
         }
 
@@ -118,15 +111,15 @@ const handleWhatsApp = async (msg) => {
                 location_source: session.location_source || 'unknown',
                 citizen_id: session.citizen_id,
                 department_id: departmentId,
-                channel: session.channel || 'whatsapp',
+                channel: 'whatsapp',
                 sla_deadline: slaDeadline.toISOString(),
                 status: 'open'
             }]).select().single();
 
             if (error) {
-                await sendMessage(phone, "Sorry, there was an error saving your complaint. Please try again.", channel);
+                await sendWhatsApp(phone, "Sorry, there was an error saving your complaint. Please try again.");
             } else {
-                await sendMessage(phone, `Thank you! Your complaint has been registered.\nTicket ID: ${ticketId}\nStatus: OPEN\nWe will notify you once a worker is assigned.`, channel);
+                await sendWhatsApp(phone, `Thank you! Your complaint has been registered.\nTicket ID: ${ticketId}\nStatus: OPEN\nWe will notify you once a worker is assigned.`);
                 
                 try {
                     supabase.rpc('increment_complaint_count', { citizen_id_param: session.citizen_id }).then().catch(()=>{});
@@ -142,7 +135,7 @@ const handleWhatsApp = async (msg) => {
 
         default:
             clearSession(phone);
-            await sendMessage(phone, "Session expired. Please say 'Hi' to start again.", channel);
+            await sendWhatsApp(phone, "Session expired. Please say 'Hi' to start again.");
             break;
     }
 };

@@ -76,13 +76,12 @@ const sendSMS = async (to, body) => {
 };
 
 /**
- * Unified sender that routes to the correct channel
+ * Voice call placeholder — Vonage supports this but requires additional setup
  */
-const sendMessage = async (to, body, channel = 'whatsapp', mediaUrl = null) => {
-    if (channel === 'sms') {
-        return await sendSMS(to, body);
-    }
-    return await sendWhatsApp(to, body, mediaUrl);
+const makeCall = async (to, message) => {
+    console.log(`[Vonage] Voice call to ${to} not yet configured. Message: ${message}`);
+    // For prototype, send an SMS instead as fallback
+    return await sendSMS(to, `[Auto-Reminder] ${message}`);
 };
 
-module.exports = { sendWhatsApp, sendSMS, makeCall, sendMessage };
+module.exports = { sendWhatsApp, sendSMS, makeCall };

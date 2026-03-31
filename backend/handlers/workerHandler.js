@@ -1,12 +1,16 @@
-const { sendMessage } = require('../utils/notify');
+// backend/handlers/workerHandler.js — Vonage-based Worker WhatsApp Handler
+const supabase = require('../config/supabase');
+const { getSession, setSession, clearSession } = require('../utils/sessionStore');
+const { uploadTwilioMediaToSupabase } = require('../utils/storage');
+const { sendWhatsApp } = require('../utils/notify');
 
 /**
- * Handles incoming WhatsApp/SMS messages from registered workers.
- * @param {Object} msg - Normalized message { phone, body, mediaUrl, latitude, longitude, messageType, channel }
+ * Handles incoming WhatsApp messages from registered workers.
+ * @param {Object} msg - Normalized message { phone, body, mediaUrl, latitude, longitude, messageType }
  * @param {Object} worker - The worker record from Supabase
  */
 const handleWorkerWhatsApp = async (msg, worker) => {
-    const { phone, body: rawBody, mediaUrl, channel } = msg;
+    const { phone, body: rawBody, mediaUrl } = msg;
     const body = (rawBody || '').trim().toUpperCase();
 
     let session = getSession(phone) || { state: 'IDLE' };
@@ -22,10 +26,10 @@ const handleWorkerWhatsApp = async (msg, worker) => {
             .in('status', ['assigned', 'in_progress']);
 
         if (error || !tickets || tickets.length === 0) {
-            await sendMessage(phone, "You have no active tickets assigned.", channel);
+            await sendWhatsApp(phone, "You have no active tickets assigned.");
         } else {
             const list = tickets.map(t => `• [${t.status.toUpperCase()}] ${t.ticket_id}: ${t.category} at ${t.address_ward}`).join('\n');
-            await sendMessage(phone, `Your active tickets:\n${list}\n\nReply 'CLAIM <id>' to start or 'RESOLVE <id>' to close.`, channel);
+            await sendWhatsApp(phone, `Your active tickets:\n${list}\n\nReply 'CLAIM <id>' to start or 'RESOLVE <id>' to close.`);
         }
         return;
     }
@@ -42,16 +46,13 @@ const handleWorkerWhatsApp = async (msg, worker) => {
             .single();
 
         if (error || !data) {
-            await sendMessage(phone, `Error: Could not claim ticket ${ticketId}. Is it assigned to you?`, channel);
+            await sendWhatsApp(phone, `Error: Could not claim ticket ${ticketId}. Is it assigned to you?`);
         } else {
-            await sendMessage(phone, `Ticket ${ticketId} is now IN PROGRESS. Resolve it once fixed.`, channel);
+            await sendWhatsApp(phone, `Ticket ${ticketId} is now IN PROGRESS. Resolve it once fixed.`);
             // Notify citizen
-            const { data: complaint } = await supabase.from('complaints').select('citizen_id, channel').eq('ticket_id', ticketId).single();
-            if (complaint) {
-                const { data: citizen } = await supabase.from('citizens').select('phone').eq('id', complaint.citizen_id).single();
-                if (citizen) {
-                    await sendMessage(citizen.phone, `Update: Worker ${worker.name} has started working on your complaint ${ticketId}.`, complaint.channel || 'whatsapp');
-                }
+            const { data: citizen } = await supabase.from('citizens').select('phone').eq('id', data.citizen_id).single();
+            if (citizen) {
+                await sendWhatsApp(citizen.phone, `Update: Worker ${worker.name} has started working on your complaint ${ticketId}.`);
             }
         }
         return;
@@ -68,43 +69,17 @@ const handleWorkerWhatsApp = async (msg, worker) => {
             .single();
 
         if (ticket) {
-            // SMS doesn't support photos easily, resolve immediately if on SMS
-            if (channel === 'sms') {
-                const { data: updatedTicket, error } = await supabase
-                    .from('complaints')
-                    .update({ 
-                        status: 'resolved', 
-                        resolved_at: new Date(),
-                        updated_at: new Date()
-                    })
-                    .eq('id', ticket.id)
-                    .select('ticket_id, citizen_id, channel')
-                    .single();
-
-                if (!error) {
-                    await sendMessage(phone, `Ticket ${ticketId} RESOLVED successfully. Good job!`, channel);
-                    await supabase.from('workers').update({ is_available: true }).eq('id', worker.id);
-                    
-                    const { data: citizen } = await supabase.from('citizens').select('phone').eq('id', updatedTicket.citizen_id).single();
-                    if (citizen) {
-                        await sendMessage(citizen.phone, `Congratulations! Your complaint ${ticketId} has been RESOLVED.`, updatedTicket.channel || 'whatsapp');
-                    }
-                } else {
-                    await sendMessage(phone, "Error updating ticket status. Please try again.", channel);
-                }
-            } else {
-                setSession(phone, { state: 'AWAIT_RESOLVE_PHOTO', ticket_id: ticketId, complaint_id: ticket.id, channel });
-                await sendMessage(phone, `To resolve ${ticketId}, please send a completion PHOTO showing the fixed issue.`, channel);
-            }
+            setSession(phone, { state: 'AWAIT_RESOLVE_PHOTO', ticket_id: ticketId, complaint_id: ticket.id });
+            await sendWhatsApp(phone, `To resolve ${ticketId}, please send a completion PHOTO showing the fixed issue.`);
         } else {
-            await sendMessage(phone, `Error: You cannot resolve ticket ${ticketId}.`, channel);
+            await sendWhatsApp(phone, `Error: You cannot resolve ticket ${ticketId}.`);
         }
         return;
     }
 
     // 4. PHOTO Handling (for RESOLVE)
     if (session.state === 'AWAIT_RESOLVE_PHOTO' && mediaUrl) {
-        await sendMessage(phone, "Processing resolution photo... please wait.", channel);
+        await sendWhatsApp(phone, "Processing resolution photo... please wait.");
         
         const publicUrl = await uploadTwilioMediaToSupabase(mediaUrl, session.ticket_id, 'completion');
 
@@ -118,31 +93,31 @@ const handleWorkerWhatsApp = async (msg, worker) => {
                     updated_at: new Date()
                 })
                 .eq('id', session.complaint_id)
-                .select('ticket_id, citizen_id, channel')
+                .select('ticket_id, citizen_id')
                 .single();
 
             if (!error) {
-                await sendMessage(phone, `Ticket ${session.ticket_id} RESOLVED successfully. Good job!`, channel);
+                await sendWhatsApp(phone, `Ticket ${session.ticket_id} RESOLVED successfully. Good job!`);
                 // Mark worker as available again
                 await supabase.from('workers').update({ is_available: true }).eq('id', worker.id);
                 
                 // Notify citizen
                 const { data: citizen } = await supabase.from('citizens').select('phone').eq('id', ticket.citizen_id).single();
                 if (citizen) {
-                    await sendMessage(citizen.phone, `Congratulations! Your complaint ${session.ticket_id} has been RESOLVED. Resolution photo: ${publicUrl}`, ticket.channel || 'whatsapp');
+                    await sendWhatsApp(citizen.phone, `Congratulations! Your complaint ${session.ticket_id} has been RESOLVED. Resolution photo: ${publicUrl}`);
                 }
                 clearSession(phone);
             } else {
-                await sendMessage(phone, "Error updating ticket status. Please try again.", channel);
+                await sendWhatsApp(phone, "Error updating ticket status. Please try again.");
             }
         } else {
-            await sendMessage(phone, "Failed to process photo. Please try sending it again.", channel);
+            await sendWhatsApp(phone, "Failed to process photo. Please try sending it again.");
         }
         return;
     }
 
     // Default Fallback
-    await sendMessage(phone, "Commands: 'LIST', 'CLAIM <id>', 'RESOLVE <id>'.", channel);
+    await sendWhatsApp(phone, "Commands: 'LIST', 'CLAIM <id>', 'RESOLVE <id>'.");
 };
 
 module.exports = { handleWorkerWhatsApp };
