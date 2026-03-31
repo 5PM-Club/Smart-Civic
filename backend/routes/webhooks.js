@@ -47,8 +47,8 @@ router.post('/whatsapp/inbound', async (req, res) => {
             msgType = data.message.content.type || msgType;
         }
         
-        // If there's absolutely no text or media, ignore
-        if (!bodyText && !mediaUrl) {
+        // If there's absolutely no text, media, or location data, ignore
+        if (!bodyText && !mediaUrl && !lat && !long) {
            return;
         }
 
