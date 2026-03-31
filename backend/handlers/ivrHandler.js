@@ -14,14 +14,15 @@ const { dispatchComplaint } = require('../services/dispatchService');
  */
 
 const handleIVR = async (req, res) => {
-    // Exotel expects XML (ExoML)
+    console.log(`[IVR] Incoming call from: ${req.body.From || req.body.from}`);
     res.set('Content-Type', 'text/xml');
     res.send(`
         <Response>
-            <Play>https://smart-civic.com/audio/welcome.mp3</Play>
-            <Gather action="${getBaseUrl(req)}/webhook/ivr/category" numDigits="1" timeout="10">
-                <Say>Welcome to Smart Civic. Press 1 for Garbage, 2 for Pothole, 3 for Drainage, 4 for Water leak, or 5 for Streetlight.</Say>
+            <Gather action="${getBaseUrl(req)}/webhook/ivr/category" numDigits="1" timeout="10" method="POST">
+                <Say voice="alice">Welcome to Smart Civic. For Garbage collection, press 1. For Potholes, press 2. For Drainage, press 3. For Water leaks, press 4. For Streetlights, press 5.</Say>
             </Gather>
+            <Say>We did not receive any input. Goodbye.</Say>
+            <Hangup />
         </Response>
     `);
 };
@@ -29,6 +30,7 @@ const handleIVR = async (req, res) => {
 const handleIVRCategory = async (req, res) => {
     const digits = req.body.digits || req.body.Digits || '';
     const phone = req.body.From || req.body.from || '';
+    console.log(`[IVR] Category selection: ${digits} from ${phone}`);
 
     const map = { '1': 'garbage', '2': 'pothole', '3': 'drainage', '4': 'water_leak', '5': 'streetlight' };
     const category = map[digits];
@@ -38,16 +40,18 @@ const handleIVRCategory = async (req, res) => {
         setSession(phone, { state: 'IVR_ZONE', category });
         res.send(`
             <Response>
-                <Gather action="${getBaseUrl(req)}/webhook/ivr/zone" numDigits="1">
-                    <Say>You selected ${category.replace('_', ' ')}. Press 1 for Zone 1, 2 for Zone 2, 3 for Zone 3.</Say>
+                <Gather action="${getBaseUrl(req)}/webhook/ivr/zone" numDigits="1" method="POST">
+                    <Say voice="alice">You selected ${category.replace('_', ' ')}. Please select your zone. Press 1 for Zone 1, 2 for Zone 2, or 3 for Zone 3.</Say>
                 </Gather>
+                <Say>Input timeout. Goodbye.</Say>
+                <Hangup />
             </Response>
         `);
     } else {
         res.send(`
             <Response>
-                <Say>Invalid selection.</Say>
-                <Redirect>${getBaseUrl(req)}/webhook/ivr</Redirect>
+                <Say voice="alice">Invalid selection. Let's try again.</Say>
+                <Redirect method="POST">${getBaseUrl(req)}/webhook/ivr</Redirect>
             </Response>
         `);
     }
@@ -56,6 +60,7 @@ const handleIVRCategory = async (req, res) => {
 const handleIVRZone = async (req, res) => {
     const digits = req.body.digits || req.body.Digits || '';
     const phone = req.body.From || req.body.from || '';
+    console.log(`[IVR] Zone selection: ${digits} from ${phone}`);
     let session = getSession(phone);
 
     res.set('Content-Type', 'text/xml');
@@ -64,19 +69,22 @@ const handleIVRZone = async (req, res) => {
         setSession(phone, session);
         res.send(`
             <Response>
-                <Gather action="${getBaseUrl(req)}/webhook/ivr/ward" numDigits="1">
-                    <Say>Zone ${digits} confirmed. Please enter your ward number from 1 to 5.</Say>
+                <Gather action="${getBaseUrl(req)}/webhook/ivr/ward" numDigits="1" method="POST">
+                    <Say voice="alice">Zone ${digits} confirmed. Please enter your ward number from 1 to 5.</Say>
                 </Gather>
+                <Say>Input timeout. Goodbye.</Say>
+                <Hangup />
             </Response>
         `);
     } else {
-        res.send(`<Response><Say>Session expired.</Say></Response>`);
+        res.send(`<Response><Say>Session expired. Please call again.</Say><Hangup /></Response>`);
     }
 };
 
 const handleIVRWard = async (req, res) => {
     const digits = req.body.digits || req.body.Digits || '';
     const phone = req.body.From || req.body.from || '';
+    console.log(`[IVRWard] Ward selection: ${digits} from ${phone}`);
     let session = getSession(phone);
 
     res.set('Content-Type', 'text/xml');
@@ -85,18 +93,19 @@ const handleIVRWard = async (req, res) => {
         setSession(phone, session);
         res.send(`
             <Response>
-                <Say>Thank you. After the beep, please state the location. Press hash when finished.</Say>
-                <Record action="${getBaseUrl(req)}/webhook/ivr/recording" maxLength="30" finishOnKey="#" />
+                <Say voice="alice">Thank you. After the beep, please state the exact location and issue. Press any key when finished.</Say>
+                <Record action="${getBaseUrl(req)}/webhook/ivr/recording" maxLength="30" finishOnKey="#" playBeep="true" method="POST" />
             </Response>
         `);
     } else {
-        res.send(`<Response><Say>Session expired.</Say></Response>`);
+        res.send(`<Response><Say>Session expired.</Say><Hangup /></Response>`);
     }
 };
 
 const handleIVRRecording = async (req, res) => {
     const phone = req.body.From || req.body.from || '';
     const recordingUrl = req.body.RecordingUrl || req.body.recording_url || '';
+    console.log(`[IVR] Recording received for ${phone}: ${recordingUrl}`);
     let session = getSession(phone);
 
     res.set('Content-Type', 'text/xml');
@@ -118,7 +127,7 @@ const handleIVRRecording = async (req, res) => {
         await supabase.from('complaints').insert([{
             ticket_id: ticketId,
             category: session.category,
-            description: `Voice Recording: ${recordingUrl}`,
+            description: `Voice Recording (Local): ${recordingUrl}`,
             address_ward: addressWard,
             channel: 'ivr',
             citizen_id: citizen.id,
@@ -130,12 +139,12 @@ const handleIVRRecording = async (req, res) => {
         clearSession(phone);
         res.send(`
             <Response>
-                <Say>Your complaint has been registered. Your ticket ID is ${ticketId}. Goodbye.</Say>
+                <Say voice="alice">Thank you. Your complaint has been registered. Your ticket ID is ${ticketId.split('').join(' ')}. Goodbye.</Say>
                 <Hangup />
             </Response>
         `);
     } else {
-        res.send(`<Response><Say>Sorry, session expired.</Say></Response>`);
+        res.send(`<Response><Say>Sorry, session expired.</Say><Hangup /></Response>`);
     }
 };
 
@@ -144,7 +153,11 @@ const handleIVRRecording = async (req, res) => {
  */
 function getBaseUrl(req) {
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    let host = req.headers['x-forwarded-host'] || req.headers.host;
+    // Handle comma-separated hosts from proxies
+    if (host && host.includes(',')) {
+        host = host.split(',')[0].trim();
+    }
     return `${protocol}://${host}`;
 }
 
