@@ -148,6 +148,43 @@ const handleIVRRecording = async (req, res) => {
     }
 };
 
+const handleIVRInstantWhatsApp = async (req, res) => {
+    const phone = req.body.From || req.body.from || req.query.From || '';
+    const digit = req.query.digit || req.body.digits || req.body.Digits || '';
+    
+    console.log(`[IVR-to-WhatsApp] Digit ${digit} from ${phone}`);
+
+    const map = { '1': 'garbage', '2': 'pothole', '3': 'drainage', '4': 'water_leak', '5': 'streetlight' };
+    const category = map[digit] || 'general';
+
+    // 1. Ensure Citizen exists and set state
+    let { data: citizen } = await supabase.from('citizens').select('*').eq('phone', phone).single();
+    if (!citizen) {
+        const { data: newCitizen } = await supabase.from('citizens').insert([{ phone }]).select().single();
+        citizen = newCitizen;
+    }
+
+    // 2. Set Session state for WhatsApp handler to pickup
+    setSession(phone, { 
+        state: 'AWAIT_LOCATION', 
+        category: category,
+        channel: 'whatsapp'
+    });
+
+    // 3. Send the outbound WhatsApp message
+    const welcomeMsg = `Hi! You selected *${category.replace('_', ' ')}* via our IVR call. \n\nTo finish your report, please send your **Live Location** or type your **Ward Name**.`;
+    await sendMessage(phone, welcomeMsg, 'whatsapp');
+
+    // 4. Respond to Exotel to end the call gracefully
+    res.set('Content-Type', 'text/xml');
+    res.send(`
+        <Response>
+            <Say voice="alice">Thank you. I have sent a WhatsApp message to your number. Please check it to finish your report. Goodbye.</Say>
+            <Hangup />
+        </Response>
+    `);
+};
+
 /**
  * Helper: Get the base URL from the request for callback URLs
  */
@@ -166,5 +203,6 @@ module.exports = {
     handleIVRCategory, 
     handleIVRZone, 
     handleIVRWard, 
-    handleIVRRecording 
+    handleIVRRecording,
+    handleIVRInstantWhatsApp
 };

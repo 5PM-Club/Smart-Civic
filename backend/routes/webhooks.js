@@ -124,5 +124,6 @@ router.post('/ivr/category', handleIVRCategory);
 router.post('/ivr/zone', handleIVRZone);
 router.post('/ivr/ward', handleIVRWard);
 router.post('/ivr/recording', handleIVRRecording);
+router.post('/ivr/instant-whatsapp', handleIVRInstantWhatsApp);
 
 module.exports = router;
