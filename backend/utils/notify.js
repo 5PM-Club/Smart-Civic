@@ -84,4 +84,14 @@ const makeCall = async (to, message) => {
     return await sendSMS(to, `[Auto-Reminder] ${message}`);
 };
 
-module.exports = { sendWhatsApp, sendSMS, makeCall };
+/**
+ * Unified sender - handles both SMS and WhatsApp
+ */
+const sendMessage = async (to, body, channel = 'whatsapp', mediaUrl = null) => {
+    if (channel === 'sms') {
+        return await sendSMS(to, body);
+    }
+    return await sendWhatsApp(to, body, mediaUrl);
+};
+
+module.exports = { sendWhatsApp, sendSMS, makeCall, sendMessage };

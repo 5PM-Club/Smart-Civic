@@ -59,7 +59,8 @@ router.post('/whatsapp/inbound', async (req, res) => {
             mediaUrl: mediaUrl,
             latitude: lat,
             longitude: long,
-            messageType: msgType
+            messageType: msgType,
+            channel: 'whatsapp'
         };
 
         // 1. Identify: Is this a Worker or a Citizen?
@@ -104,7 +105,8 @@ router.post('/sms', async (req, res) => {
         mediaUrl: null,
         latitude: null,
         longitude: null,
-        messageType: 'text'
+        messageType: 'text',
+        channel: 'sms'
     };
 
     try {
