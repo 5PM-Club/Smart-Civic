@@ -9,8 +9,7 @@ const {
     handleIVRCategory, 
     handleIVRZone, 
     handleIVRWard, 
-    handleIVRRecording,
-    handleIVRInstantWhatsApp
+    handleIVRRecording 
 } = require('../handlers/ivrHandler');
 
 // ========== VONAGE WHATSAPP WEBHOOKS ==========
@@ -119,12 +118,11 @@ router.post('/sms', async (req, res) => {
     }
 });
 
-// ========== IVR ROUTES (Exotel & generic support) ==========
-router.all('/ivr', handleIVR);
-router.all('/ivr/category', handleIVRCategory);
-router.all('/ivr/zone', handleIVRZone);
-router.all('/ivr/ward', handleIVRWard);
-router.all('/ivr/recording', handleIVRRecording);
-router.all('/ivr/instant-whatsapp', handleIVRInstantWhatsApp);
+// ========== IVR ROUTES (Kept for future use — requires Vonage Voice setup) ==========
+router.post('/ivr', handleIVR);
+router.post('/ivr/category', handleIVRCategory);
+router.post('/ivr/zone', handleIVRZone);
+router.post('/ivr/ward', handleIVRWard);
+router.post('/ivr/recording', handleIVRRecording);
 
 module.exports = router;

@@ -162,7 +162,7 @@ router.patch('/:id/status', async (req, res) => {
             .from('complaints')
             .update(updates)
             .eq('id', id)
-            .select('*, citizens(phone, preferred_language), workers(name, phone)')
+            .select('*, citizens:citizen_id(phone, preferred_language), workers:worker_id(name, phone)')
             .single();
 
         if (error) {
@@ -174,63 +174,39 @@ router.patch('/:id/status', async (req, res) => {
         console.log(`[Status Debug] Citizen:`, JSON.stringify(complaint.citizens));
         console.log(`[Status Debug] Worker:`, JSON.stringify(complaint.workers));
 
-        const citizen = complaint.citizens;
-        const worker = complaint.workers;
-
         // If a worker is being assigned, notify both the worker and the citizen
-        if (worker_id && worker && citizen) {
-            const lang = citizen.preferred_language || 'en';
+        if (worker_id && complaint.workers && complaint.citizens) {
+            const lang = complaint.citizens.preferred_language || 'en';
             const cat = categories[complaint.category];
             const localizedCatName = lang === 'ta' ? cat?.name_ta : (lang === 'hi' ? cat?.name_hi : cat?.name);
 
-            // 1. Notify Worker (Always English)
-            const workerMsg = `Hello ${worker.name}! A new ticket ${complaint.ticket_id} has been assigned to you.\nCategory: ${complaint.category}\nLocation: ${complaint.address_ward || 'N/A'}\nDescription: ${complaint.description}\nPlease resolve this within the SLA deadline.`;
-            
-            // Only send photo if it's a real URL (Vonage Sandbox doesn't like Base64)
-            const photoToSend = (complaint.photo_url && !complaint.photo_url.startsWith('data:image')) ? complaint.photo_url : null;
+            // 1. Notify Worker (Always English for admin technical details)
+            const workerMsg = `Hello ${complaint.workers.name}! A new ticket ${complaint.ticket_id} has been assigned to you.\nCategory: ${complaint.category}\nLocation: ${complaint.address_ward || 'N/A'}\nDescription: ${complaint.description}\nPlease resolve this within the SLA deadline.`;
+            console.log(`[Notification] Sending to Worker: ${complaint.workers.phone}`);
+            await sendMessage(complaint.workers.phone, workerMsg, 'whatsapp', complaint.photo_url);
 
-            if (worker.phone) {
-                console.log(`[Notification] Sending to Worker: ${worker.phone}`);
-                await sendMessage(worker.phone, workerMsg, 'whatsapp', photoToSend);
-            }
-
-            // 2. Notify Citizen
+            // 2. Notify Citizen (In their preferred language)
             const citizenMsg = getTranslation(lang, 'worker_assigned', {
-                workerName: worker.name,
+                workerName: complaint.workers.name,
                 category: localizedCatName || complaint.category,
                 ticketId: complaint.ticket_id
             });
+            console.log(`[Notification] Sending to Citizen (${lang}): ${complaint.citizens.phone}`);
+            await sendMessage(complaint.citizens.phone, citizenMsg, complaint.channel || 'whatsapp');
 
-            if (citizen.phone) {
-                console.log(`[Notification] Sending to Citizen (${lang}): ${citizen.phone}`);
-                await sendMessage(citizen.phone, citizenMsg, complaint.channel || 'whatsapp');
-            }
-
-            // 3. Mark Worker Busy
+            // 3. Update Worker Availability
             await supabase.from('workers').update({ is_available: false }).eq('id', worker_id);
         }
 
         // If marked as resolved by admin, notify the citizen
-        if (status === 'resolved' && citizen && citizen.phone) {
-            const lang = citizen.preferred_language || 'en';
-            
-            // Re-fetch citizen to check complaint count for rewards
-            const { data: citizenFull } = await supabase.from('citizens').select('complaint_count, has_badge').eq('id', complaint.citizen_id).single();
-            const threshold = parseInt(process.env.BADGE_THRESHOLD || '5');
-            let rewardMsg = '';
-            
-            if (citizenFull && citizenFull.complaint_count >= threshold && !citizenFull.has_badge) {
-                await supabase.from('citizens').update({ has_badge: true }).eq('id', complaint.citizen_id);
-                rewardMsg = `\n\n🎉 ${lang === 'ta' ? 'வாழ்த்துக்கள்! நீங்கள் "சமூக உதவியாளர் பச்சை பேட்ஜ்" வென்றுள்ளீர்கள்.' : 'Congratulations! You have earned the Community Helper Green Badge.'}`;
-            }
-
+        if (status === 'resolved' && complaint.citizens && complaint.citizens.phone) {
+            const lang = complaint.citizens.preferred_language || 'en';
             const message = getTranslation(lang, 'status_update', { 
                 ticketId: complaint.ticket_id, 
                 status: lang === 'ta' ? 'தீர்க்கப்பட்டது (RESOLVED)' : 'RESOLVED' 
-            }) + rewardMsg;
-
-            console.log(`[Notification] Sending Resolution to Citizen: ${citizen.phone}`);
-            await sendMessage(citizen.phone, message, complaint.channel || 'whatsapp');
+            });
+            console.log(`[Notification] Sending Resolution to Citizen: ${complaint.citizens.phone}`);
+            await sendMessage(complaint.citizens.phone, message, complaint.channel || 'whatsapp');
         }
 
         res.json(complaint);

@@ -22,16 +22,10 @@ const sendWhatsApp = async (to, body, mediaUrl = null) => {
 
         // If there's an image to send, change message type
         if (mediaUrl) {
-            if (mediaUrl.startsWith('data:image')) {
-                console.warn('[Vonage] Skipping image attachment: Base64 data not supported by Vonage API.');
-            } else {
-                payload.message_type = 'image';
-                payload.image = { url: mediaUrl, caption: body };
-                delete payload.text;
-            }
+            payload.message_type = 'image';
+            payload.image = { url: mediaUrl, caption: body };
+            delete payload.text;
         }
-
-        console.log(`[VONAGE-PAYLOAD] To: ${payload.to}, Type: ${payload.message_type}`);
 
         const response = await axios.post(VONAGE_API, payload, {
             auth: {
