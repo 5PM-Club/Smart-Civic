@@ -151,58 +151,69 @@ const handleIVRRecording = async (req, res) => {
 
 const handleIVRInstantWhatsApp = async (req, res) => {
     try {
-        console.log(`[IVR-to-WhatsApp Decode] Raw Body:`, JSON.stringify(req.body));
-        console.log(`[IVR-to-WhatsApp Decode] Raw Query:`, JSON.stringify(req.query));
+        const body = req.body || {};
+        const query = req.query || {};
 
-        let phone = req.body.From || req.body.from || req.query.From || '';
-        const digit = req.query.digit || req.body.digits || req.body.Digits || '';
-        
-        if (!phone) {
-            console.error('[IVR ERROR] No phone number found in request.');
-            return res.status(200).send('No phone'); 
+        const phoneRaw = body.From || query.From || body.from || query.from || '';
+        const digitRaw = body.digits || query.digits || body.Digits || query.Digits || query.digit || '';
+
+        if (!phoneRaw) {
+            console.error('[IVR ERROR] No phone number found in Exotel request.');
+            return res.status(200).send('ERR: No Phone'); 
         }
 
         // Normalize phone: Ensure it has a '+' prefix for our database/session store
+        let phone = phoneRaw.trim();
         if (!phone.startsWith('+')) phone = `+${phone}`;
 
-        console.log(`[IVR-to-WhatsApp] Digit ${digit} from confirmed phone ${phone}`);
+        // Normalize digit: Get the first character in case it's "1#"
+        const digit = (digitRaw.toString() || '').replace(/[^0-9]/g, '')[0] || '';
+
+        console.log(`[IVR-NORMALIZED] User: ${phone}, Digit Pressed: ${digit}`);
 
         const map = { '1': 'garbage', '2': 'pothole', '3': 'drainage', '4': 'water_leak', '5': 'streetlight' };
         const category = map[digit] || 'general';
 
-        // 1. Ensure Citizen exists and set state
+        // 1. Ensure Citizen exists
+        console.log(`[IVR-LOG] Checking citizen in Supabase for ${phone}`);
         let { data: citizen, error: citError } = await supabase.from('citizens').select('*').eq('phone', phone).single();
+        
         if (!citizen) {
-            console.log(`[IVR] Creating new citizen for ${phone}`);
-            const { data: newCitizen } = await supabase.from('citizens').insert([{ phone }]).select().single();
+            console.log(`[IVR-LOG] No citizen found. Attempting to insert...`);
+            const { data: newCitizen, error: insError } = await supabase.from('citizens').insert([{ phone }]).select().single();
+            if (insError) {
+                console.error(`[IVR-ERR] Supabase Insert Failed:`, insError.message);
+                throw new Error(`Citizen creation failed: ${insError.message}`);
+            }
             citizen = newCitizen;
+            console.log(`[IVR-LOG] New citizen created: ${citizen.id}`);
         }
 
-        // 2. Set Session state for WhatsApp handler to pickup
+        // 2. Set Session state
+        console.log(`[IVR-LOG] Setting session for ${phone}`);
         setSession(phone, { 
             state: 'AWAIT_LOCATION', 
             category: category,
             channel: 'whatsapp'
         });
 
-        // 3. Send the outbound WhatsApp message
-        const welcomeMsg = `🚨 *SMART CIVIC ACTION REQUIRED* 🚨\n\nYou selected *${category.toUpperCase().replace('_', ' ')}* via our IVR Call.\n\nTo complete your report, please send your **Live Location** or type your **Ward Name** now.`;
+        // 3. Send message
+        const welcomeMsg = `🚨 *SMART CIVIC REPORT* 🚨\n\nYou selected *${category.toUpperCase().replace('_', ' ')}*.\n\nPlease send your **Live Location** or type your **Ward Name** now.`;
         
-        console.log(`[IVR] Attempting to send WhatsApp message to ${phone}...`);
+        console.log(`[IVR-LOG] Dispatching message to ${phone}...`);
         const messageId = await sendMessage(phone, welcomeMsg, 'whatsapp');
         
         if (messageId) {
             console.log(`[IVR SUCCESS] WhatsApp sent: ${messageId}`);
         } else {
-            console.log(`[IVR WARNING] WhatsApp failed (likely Sandbox opt-in missing). Sending SMS fallback...`);
-            await sendMessage(phone, `Smart Civic: You selected ${category}. Please reply with your Ward & Issue details.`, 'sms');
+            console.log(`[IVR-WARNING] WhatsApp failed/opt-out. Trying SMS...`);
+            await sendMessage(phone, `Smart Civic: You selected ${category}. Please reply with your Ward to continue.`, 'sms');
         }
 
-        // 4. Respond to Exotel (Plain text for Passthru is safer)
-        res.status(200).send('OK');
+        return res.status(200).send('OK');
     } catch (err) {
-        console.error(`[IVR CRASH] Fatal error in handleIVRInstantWhatsApp:`, err.message);
-        res.status(200).send('OK-with-error'); // Still send OK so Exotel doesn't loop
+        console.error(`[IVR CRASH] Fatal Error Line: ${err.stack}`);
+        return res.status(200).send('OK'); // Always send OK to Exotel
     }
 };
 

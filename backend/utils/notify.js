@@ -27,6 +27,8 @@ const sendWhatsApp = async (to, body, mediaUrl = null) => {
             delete payload.text;
         }
 
+        console.log(`[VONAGE-PAYLOAD] To: ${payload.to}, Type: ${payload.message_type}`);
+
         const response = await axios.post(VONAGE_API, payload, {
             auth: {
                 username: process.env.VONAGE_API_KEY,
