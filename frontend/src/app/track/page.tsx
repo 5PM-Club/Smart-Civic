@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, MapPin, Clock, CheckCircle2, AlertCircle, User, HardHat, List, Image as ImageIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { fetchAPI } from "@/lib/api";
 
 export default function TrackTicket() {
@@ -10,6 +11,15 @@ export default function TrackTicket() {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const ticketId = searchParams.get('id');
+    if (ticketId) {
+      setSearchQuery(ticketId);
+      performSearch(ticketId);
+    }
+  }, [searchParams]);
 
   const getExpectedDepartment = (categoryStr: string) => {
       if (!categoryStr) return null;
@@ -21,9 +31,8 @@ export default function TrackTicket() {
       return null;
   };
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  const performSearch = async (query: string) => {
+    if (!query.trim()) return;
     
     setLoading(true);
     setError("");
@@ -31,12 +40,12 @@ export default function TrackTicket() {
     setResults([]);
 
     try {
-      const query = searchQuery.trim();
+      const q = query.trim();
 
       // If it looks like a ticket ID, search by ticket endpoint
-      if (query.toUpperCase().startsWith("CMP-")) {
+      if (q.toUpperCase().startsWith("CMP-")) {
         try {
-          const ticket = await fetchAPI(`/api/tickets/${query.toUpperCase()}/status`);
+          const ticket = await fetchAPI(`/api/tickets/${q.toUpperCase()}/status`);
           const locationStr = ticket.address_ward || (ticket.lat ? `${ticket.lat.toFixed(4)}, ${ticket.lng.toFixed(4)}` : 'Location not specified');
           setSelectedTicket({
             ...ticket,
@@ -55,13 +64,13 @@ export default function TrackTicket() {
       // Search complaints by general query
       const complaints = await fetchAPI('/api/complaints');
       const filtered = complaints.filter((c: any) =>
-        c.ticket_id?.toLowerCase().includes(query.toLowerCase()) ||
-        c.address_ward?.toLowerCase().includes(query.toLowerCase()) ||
-        (c.workers?.name || '').toLowerCase().includes(query.toLowerCase())
+        c.ticket_id?.toLowerCase().includes(q.toLowerCase()) ||
+        c.address_ward?.toLowerCase().includes(q.toLowerCase()) ||
+        (c.workers?.name || '').toLowerCase().includes(q.toLowerCase())
       );
 
       if (filtered.length === 0) {
-        setError(`No complaints found for "${searchQuery}". Please check your ticket ID or search term.`);
+        setError(`No complaints found for "${q}". Please check your ticket ID or search term.`);
       } else if (filtered.length === 1) {
         const c = filtered[0];
         const locationStr = c.address_ward || (c.lat ? `${c.lat.toFixed(4)}, ${c.lng.toFixed(4)}` : 'Location not specified');
@@ -89,6 +98,11 @@ export default function TrackTicket() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(searchQuery);
   };
 
   const selectTicket = async (ticket: any) => {
