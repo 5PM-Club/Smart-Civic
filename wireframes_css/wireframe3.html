@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe 3 — Ticket Detail · Worker Screens · Leaderboard</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="wireframe3.css">
+</head>
+<body style="padding:32px 24px;background:#f8fafc;">
+
+<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:20px;">
+  Wireframe 3 — Ticket detail · Worker notification screens · Leaderboard
+</div>
+
+<div class="three-col">
+
+  <!-- Panel 1: Ticket Detail -->
+  <div class="panel">
+    <div class="panel-header">
+      Ticket detail — CMP-2025-00142
+      <span class="badge badge-progress">In Progress</span>
+    </div>
+    <div class="panel-body">
+
+      <div class="field-row">
+        <div class="field-label">Category</div>
+        <div class="field-val">Drainage / Flooding</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">Ward</div>
+        <div class="field-val muted">Anna Nagar West · Ward 42</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">Submitted by</div>
+        <div class="field-val muted">+91 98765 XXXXX · WhatsApp</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">Assigned worker</div>
+        <div class="field-val flex-center gap-2">
+          Ravi Kumar
+          <span class="badge badge-assigned" style="font-size:10px;padding:2px 7px;">Smartphone</span>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">SLA deadline</div>
+        <div class="field-val" style="color:#d97706;">Today 5:14 PM (3h left)</div>
+      </div>
+
+      <div class="map-placeholder">
+        Map view · 13.0827°N 80.2707°E
+        <div class="map-pin-icon"></div>
+      </div>
+
+      <div class="photo-placeholder">📷 Complaint photo (tap to view)</div>
+
+      <div class="divider"></div>
+
+      <div class="field-label" style="margin-bottom:10px;">Status history</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+          Complaint registered
+          <div class="tl-time">Today 9:14 AM — system</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+          Assigned to Ravi Kumar
+          <div class="tl-time">Today 9:16 AM — system</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot pending"></div>
+          Worker accepted task
+          <div class="tl-time">Today 10:30 AM — worker</div>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button class="action-btn action-btn-danger">⚠ Escalate complaint</button>
+        <button class="action-btn action-btn-neutral">↻ Reassign to another worker</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Panel 2: Worker Notifications -->
+  <div class="panel">
+    <div class="panel-header">Worker notification screens</div>
+    <div class="panel-body">
+
+      <div class="notif-section-label">Smartphone worker — WhatsApp</div>
+      <div class="wa-bubble-out">
+        <strong>New Task Assigned</strong><br>
+        Ticket: CMP-2025-00142<br>
+        Category: Drainage<br>
+        Ward: Anna Nagar West<br><br>
+        <span class="wa-link">maps.google.com/?q=13.08,80.27</span><br><br>
+        Reply <strong>1</strong> to Accept<br>
+        Reply <strong>3</strong> when Complete
+      </div>
+
+      <div class="notif-section-label">Basic phone worker — SMS</div>
+      <div class="sms-bubble">
+        TASK: CMP-2025-00142<br>
+        Drainage issue<br>
+        Ward: Anna Nagar West<br>
+        Near: Railway Overbridge<br>
+        Locality: 3rd Main Rd<br><br>
+        SMS 1 to accept<br>
+        SMS 3 when done
+      </div>
+
+      <div class="notif-section-label">Auto reminder (if no response in 4h)</div>
+      <div class="reminder-bubble">
+        ⏰ Reminder: Task CMP-2025-00142 is still pending. Please respond or it will be reassigned in 2 hours.
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="notif-section-label">Completion verification</div>
+
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;font-size:12px;color:#15803d;line-height:1.7;margin-bottom:8px;">
+        <strong>Smartphone worker:</strong> uploads geo-tagged completion photo via WhatsApp → stored in Supabase Storage
+      </div>
+
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:12px;color:#1e40af;line-height:1.7;">
+        <strong>Basic phone worker:</strong> sends "3 CMP-2025-00142" via SMS → system confirms and resolves ticket
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Panel 3: Leaderboard -->
+  <div class="panel">
+    <div class="panel-header">Leaderboard — Community Badges</div>
+    <div class="panel-body">
+
+      <div class="lb-trophy-wrap">
+        <div class="lb-trophy-icon">🏆</div>
+        <div class="lb-title">Citizen Leaderboard</div>
+        <div class="lb-sub">Rewarding active community reporters</div>
+      </div>
+
+      <div class="badge-box">
+        <div class="badge-circle">CB</div>
+        <div>
+          <div class="badge-text-title">Community Helper</div>
+          <div class="badge-text-sub">Green Badge — awarded at 5+ complaints</div>
+        </div>
+      </div>
+
+      <div class="field-label" style="margin-bottom:8px;">Top citizen reporters</div>
+
+      <div class="lb-row">
+        <div class="lb-rank rank-gold">🥇</div>
+        <div class="lb-name">
+          +91 98765 XXXX
+          <span class="badge badge-resolved" style="font-size:10px;padding:2px 7px;margin-left:4px;">Badge</span>
+        </div>
+        <div class="lb-count">23</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank rank-silver">🥈</div>
+        <div class="lb-name">
+          +91 87654 XXXX
+          <span class="badge badge-resolved" style="font-size:10px;padding:2px 7px;margin-left:4px;">Badge</span>
+        </div>
+        <div class="lb-count">17</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank rank-bronze">🥉</div>
+        <div class="lb-name">
+          +91 76543 XXXX
+          <span class="badge badge-resolved" style="font-size:10px;padding:2px 7px;margin-left:4px;">Badge</span>
+        </div>
+        <div class="lb-count">11</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">#4</div>
+        <div class="lb-name">+91 65432 XXXX</div>
+        <div class="lb-count">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">#5</div>
+        <div class="lb-name">+91 54321 XXXX</div>
+        <div class="lb-count">3</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field-label" style="margin-bottom:6px;">Citizen ticket status tracker</div>
+      <div class="tracker-box">
+        Public page — citizen enters ticket ID<br>
+        <span class="tracker-url">civic.city.gov/track?id=CMP-2025-00142</span>
+      </div>
+      <div class="tracker-result">
+        <strong>CMP-2025-00142</strong><br>
+        Drainage · Anna Nagar West<br>
+        Status: <strong>In Progress</strong><br>
+        Worker assigned · Est. resolution: 48 hrs
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

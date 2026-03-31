@@ -1,0 +1,148 @@
+
+<style>
+* { box-sizing: border-box; }
+.wf-label { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 10px; }
+.screens { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.screen { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 12px; overflow: hidden; }
+.screen-header { padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; font-weight: 500; color: var(--color-text-primary); background: var(--color-background-secondary); }
+.screen-body { padding: 12px 14px; }
+.field { margin-bottom: 10px; }
+.field-label { font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 2px; }
+.field-val { font-size: 12px; color: var(--color-text-primary); font-weight: 500; }
+.field-val.muted { font-weight: 400; color: var(--color-text-secondary); }
+.pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 9px; border-radius: 8px; }
+.p-blue { background: #E6F1FB; color: #0C447C; }
+.p-teal { background: #E1F5EE; color: #085041; }
+.p-amber { background: #FAEEDA; color: #633806; }
+.p-coral { background: #FAECE7; color: #712B13; }
+.p-green { background: #EAF3DE; color: #27500A; }
+.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 10px 0; }
+.timeline { position: relative; padding-left: 16px; }
+.tl-item { position: relative; margin-bottom: 10px; font-size: 11px; color: var(--color-text-secondary); }
+.tl-dot { position: absolute; left: -16px; top: 3px; width: 8px; height: 8px; border-radius: 50%; background: #0F6E56; }
+.tl-dot.gray { background: var(--color-border-secondary); }
+.tl-line { position: absolute; left: -12px; top: 11px; bottom: -10px; width: 1px; background: var(--color-border-tertiary); }
+.tl-time { font-size: 9px; color: var(--color-text-tertiary); margin-top: 1px; }
+.btn { font-size: 11px; padding: 7px 12px; border-radius: 8px; border: 0.5px solid var(--color-border-secondary); cursor: pointer; font-weight: 500; text-align: center; margin-bottom: 6px; }
+.btn-teal { background: #E1F5EE; color: #085041; border-color: #9FE1CB; }
+.btn-coral { background: #FAECE7; color: #712B13; border-color: #F0997B; }
+.btn-gray  { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.photo-mock { background: var(--color-background-secondary); border-radius: 8px; height: 70px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 10px; border: 0.5px dashed var(--color-border-secondary); }
+.map-mock { background: #e8f4f0; border-radius: 8px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #085041; margin-bottom: 10px; position: relative; overflow: hidden; }
+.map-pin { position: absolute; width: 10px; height: 10px; border-radius: 50% 50% 50% 0; background: #E24B4A; transform: rotate(-45deg); top: 30px; left: 50%; }
+.badge-box { background: #EAF3DE; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.badge-circle { width: 32px; height: 32px; border-radius: 50%; background: #27500A; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.lb-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.lb-rank { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); width: 18px; }
+.lb-name { font-size: 11px; color: var(--color-text-primary); flex: 1; }
+.lb-count { font-size: 11px; font-weight: 500; color: #085041; }
+</style>
+
+<div class="wf-label">Wireframe 3 — Ticket detail · Worker SMS · Leaderboard</div>
+<div class="screens">
+
+  <div class="screen">
+    <div class="screen-header">Ticket detail — CMP-2025-00142</div>
+    <div class="screen-body">
+      <div class="field"><div class="field-label">Status</div><div class="pill p-blue">In Progress</div></div>
+      <div class="field"><div class="field-label">Category</div><div class="field-val">Drainage / Flooding</div></div>
+      <div class="field"><div class="field-label">Ward</div><div class="field-val muted">Anna Nagar West · Ward 42</div></div>
+      <div class="field"><div class="field-label">Submitted by</div><div class="field-val muted">+91 98765 XXXXX · WhatsApp</div></div>
+      <div class="field"><div class="field-label">Assigned worker</div><div class="field-val">Ravi Kumar<span style="margin-left:6px" class="pill p-teal">Smartphone</span></div></div>
+      <div class="map-mock">Map view — 13.0827°N 80.2707°E<div class="map-pin"></div></div>
+      <div class="photo-mock">Complaint photo (tap to view)</div>
+      <div class="divider"></div>
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);margin-bottom:8px;">STATUS HISTORY</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-line"></div>Complaint registered<div class="tl-time">Today 09:14 AM</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-line"></div>Assigned to Ravi Kumar<div class="tl-time">Today 09:16 AM</div></div>
+        <div class="tl-item"><div class="tl-dot gray"></div>Worker accepted task<div class="tl-time">Today 10:30 AM</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="btn btn-coral">Escalate complaint</div>
+      <div class="btn btn-gray">Reassign to another worker</div>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-header">Worker notification screens</div>
+    <div class="screen-body">
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);margin-bottom:8px;">SMARTPHONE WORKER — WHATSAPP</div>
+      <div style="background:#dcf8c6;border-radius:12px 2px 12px 12px;padding:8px 10px;font-size:11px;color:#222;margin-bottom:10px;line-height:1.6">
+        <b>New Task Assigned</b><br>
+        Ticket: CMP-2025-00142<br>
+        Category: Drainage<br>
+        Ward: Anna Nagar West<br><br>
+        <span style="color:#185FA5;text-decoration:underline">maps.google.com/?q=13.08,80.27</span><br><br>
+        Reply <b>1</b> to Accept<br>
+        Reply <b>3</b> when Complete
+      </div>
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);margin-bottom:8px;margin-top:14px;">BASIC PHONE WORKER — SMS</div>
+      <div style="background:#fff;border:0.5px solid #ddd;border-radius:2px 12px 12px 12px;padding:8px 10px;font-size:11px;color:#222;margin-bottom:10px;line-height:1.6">
+        TASK: CMP-2025-00142<br>
+        Drainage issue<br>
+        Ward: Anna Nagar West<br>
+        Near: Railway Overbridge<br>
+        Locality: 3rd Main Rd<br><br>
+        SMS 1 to accept<br>
+        SMS 3 when done
+      </div>
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);margin-bottom:8px;margin-top:14px;">AUTO REMINDER (if no response)</div>
+      <div style="background:#FAEEDA;border-radius:8px;padding:8px 10px;font-size:11px;color:#633806;line-height:1.6">
+        Reminder: Task CMP-2025-00142 pending. Please respond or it will be reassigned in 2 hours.
+      </div>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-header">Leaderboard — Community Badges</div>
+    <div class="screen-body">
+      <div class="badge-box">
+        <div class="badge-circle">CB</div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:#27500A">Community Helper</div>
+          <div style="font-size:10px;color:#3B6D11">Green Badge — awarded at 5+ complaints</div>
+        </div>
+      </div>
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);margin-bottom:8px;">TOP CITIZEN REPORTERS</div>
+      <div class="lb-row">
+        <div class="lb-rank">1</div>
+        <div class="lb-name">+91 98765 XXXX <span class="pill p-green" style="font-size:9px;padding:1px 5px">Badge</span></div>
+        <div class="lb-count">23</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">2</div>
+        <div class="lb-name">+91 87654 XXXX <span class="pill p-green" style="font-size:9px;padding:1px 5px">Badge</span></div>
+        <div class="lb-count">17</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">3</div>
+        <div class="lb-name">+91 76543 XXXX <span class="pill p-green" style="font-size:9px;padding:1px 5px">Badge</span></div>
+        <div class="lb-count">11</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">4</div>
+        <div class="lb-name">+91 65432 XXXX</div>
+        <div class="lb-count">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">5</div>
+        <div class="lb-name">+91 54321 XXXX</div>
+        <div class="lb-count">3</div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-tertiary);margin-bottom:8px;">CITIZEN STATUS TRACKER</div>
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:10px;font-size:11px;color:var(--color-text-secondary)">
+        Public page: citizen enters ticket ID<br>
+        <span style="font-size:10px;color:#185FA5;text-decoration:underline">civic.city.gov/track?id=CMP-2025-00142</span>
+      </div>
+      <div style="background:#E6F1FB;border-radius:8px;padding:10px;font-size:11px;color:#0C447C;margin-top:8px;line-height:1.6">
+        <b>CMP-2025-00142</b><br>
+        Drainage · Anna Nagar West<br>
+        Status: <b>In Progress</b><br>
+        Worker assigned · Est: 48 hrs
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe 2 — Supervisor Dashboard</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="wireframe2.css">
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">C</div>
+      <div class="sidebar-title">Civic Admin</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Menu</div>
+      <a class="nav-item active" href="#">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M9 8h6M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Complaints
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+        Map View
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+        Workers
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+        Leaderboard
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Log Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-title">Admin / Dashboard</div>
+      <div class="topbar-user">
+        <div class="topbar-name">Admin User</div>
+        <div class="topbar-avatar">A</div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div class="page-inner">
+
+        <h1>System Overview</h1>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-label">Total Complaints</div>
+            <div class="kpi-value">142</div>
+            <div class="kpi-delta up">+18 from yesterday</div>
+          </div>
+          <div class="kpi-card kpi-green">
+            <div class="kpi-label">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Resolved
+            </div>
+            <div class="kpi-value">89</div>
+            <div class="kpi-delta up">62% resolution rate</div>
+          </div>
+          <div class="kpi-card kpi-red">
+            <div class="kpi-label">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              SLA Breached
+            </div>
+            <div class="kpi-value">7</div>
+            <div class="kpi-delta down">Needs attention</div>
+          </div>
+          <div class="kpi-card" style="color:#7c3aed">
+            <div class="kpi-label">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              Avg Resolution
+            </div>
+            <div class="kpi-value" style="color:#7c3aed">4.2h</div>
+            <div class="kpi-delta up">-0.8h vs last week</div>
+          </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="filter-tabs">
+          <div class="filter-tab active">All (142)</div>
+          <div class="filter-tab">Open (31)</div>
+          <div class="filter-tab">Assigned (15)</div>
+          <div class="filter-tab">In Progress (24)</div>
+          <div class="filter-tab">Resolved (89)</div>
+          <div class="filter-tab danger">Escalated (7)</div>
+        </div>
+
+        <!-- Complaints table -->
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <div class="search-wrap">
+              <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" placeholder="Search ticket ID or location...">
+            </div>
+            <div style="font-size:12px;font-weight:700;color:#94a3b8;">5 tickets shown</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Channel</th>
+                <th>Worker</th>
+                <th>Status</th>
+                <th>Time</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-mono">CMP-2025-00142</td>
+                <td class="td-bold">Drainage</td>
+                <td><div class="location-cell"><span class="location-pin">📍</span>Anna Nagar West</div></td>
+                <td><span class="badge badge-assigned">WhatsApp</span></td>
+                <td class="td-muted">Ravi K.</td>
+                <td><span class="badge badge-progress">In Progress</span></td>
+                <td class="td-muted">1h 20m</td>
+                <td><div class="actions-col"><button class="btn-icon">⋯</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-mono">CMP-2025-00141</td>
+                <td class="td-bold">Garbage</td>
+                <td><div class="location-cell"><span class="location-pin">📍</span>T. Nagar</div></td>
+                <td><span class="badge badge-open">SMS</span></td>
+                <td class="td-muted">—</td>
+                <td><span class="badge badge-open">Open</span></td>
+                <td class="td-muted">2h 05m</td>
+                <td><div class="actions-col"><button class="btn-icon">⋯</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-mono">CMP-2025-00140</td>
+                <td class="td-bold">Pothole</td>
+                <td><div class="location-cell"><span class="location-pin">📍</span>Adyar</div></td>
+                <td><span class="badge badge-resolved">WhatsApp</span></td>
+                <td class="td-muted">Kumar M.</td>
+                <td><span class="badge badge-resolved">Resolved</span></td>
+                <td class="td-muted">3h 12m</td>
+                <td><div class="actions-col"><button class="btn-icon">⋯</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-mono">CMP-2025-00139</td>
+                <td class="td-bold">Water Leak</td>
+                <td><div class="location-cell"><span class="location-pin">📍</span>Velachery</div></td>
+                <td><span class="badge badge-escalate">IVR</span></td>
+                <td class="td-muted">—</td>
+                <td><span class="badge badge-escalate"><span class="pulse-dot"></span>Escalated</span></td>
+                <td class="td-muted">26h 00m</td>
+                <td><div class="actions-col"><button class="btn-icon">⋯</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-mono">CMP-2025-00138</td>
+                <td class="td-bold">Streetlight</td>
+                <td><div class="location-cell"><span class="location-pin">📍</span>Kodambakkam</div></td>
+                <td><span class="badge badge-assigned">WhatsApp</span></td>
+                <td class="td-muted">Suresh R.</td>
+                <td><span class="badge badge-progress">In Progress</span></td>
+                <td class="td-muted">4h 45m</td>
+                <td><div class="actions-col"><button class="btn-icon">⋯</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bottom grid -->
+        <div class="bottom-grid">
+          <!-- Chart -->
+          <div class="chart-card">
+            <h3>Complaints by category</h3>
+            <div class="bar-group">
+              <div class="bar-col"><div class="bar-fill bar-garbage" style="height:100px"></div><div class="bar-lbl">Garbage</div></div>
+              <div class="bar-col"><div class="bar-fill bar-drain"   style="height:72px"></div><div class="bar-lbl">Drainage</div></div>
+              <div class="bar-col"><div class="bar-fill bar-pothole" style="height:54px"></div><div class="bar-lbl">Pothole</div></div>
+              <div class="bar-col"><div class="bar-fill bar-water"   style="height:38px"></div><div class="bar-lbl">Water</div></div>
+              <div class="bar-col"><div class="bar-fill bar-light"   style="height:28px"></div><div class="bar-lbl">Streetlight</div></div>
+            </div>
+          </div>
+
+          <!-- Workers -->
+          <div class="chart-card">
+            <h3>Workers on duty</h3>
+            <table class="workers-mini-table">
+              <thead>
+                <tr><th>Worker</th><th>Status</th><th>Tickets</th><th>Dept</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="avail-dot avail-green"></span>Ravi K.</td>
+                  <td style="color:#16a34a;font-weight:700;font-size:12px">Active</td>
+                  <td>3</td>
+                  <td class="td-muted">Sanitation</td>
+                </tr>
+                <tr>
+                  <td><span class="avail-dot avail-green"></span>Priya S.</td>
+                  <td style="color:#16a34a;font-weight:700;font-size:12px">Active</td>
+                  <td>2</td>
+                  <td class="td-muted">Sanitation</td>
+                </tr>
+                <tr>
+                  <td><span class="avail-dot avail-yellow"></span>Kumar M.</td>
+                  <td style="color:#d97706;font-weight:700;font-size:12px">Busy</td>
+                  <td>1</td>
+                  <td class="td-muted">Roads</td>
+                </tr>
+                <tr>
+                  <td><span class="avail-dot avail-gray"></span>Suresh R.</td>
+                  <td style="color:#94a3b8;font-weight:700;font-size:12px">Offline</td>
+                  <td>0</td>
+                  <td class="td-muted">Electrical</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+</div>
+</body>
+</html>

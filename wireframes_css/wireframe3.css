@@ -1,0 +1,356 @@
+/* =============================================
+   WIREFRAME 3 — Ticket Detail · Worker Screens · Leaderboard
+   Smart Civic Reporting System
+   ============================================= */
+
+/* ── Three-column panel grid ── */
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 32px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Panel (each screen box) ── */
+.panel {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fafafa;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-body {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Field rows ── */
+.field-row {
+  margin-bottom: 12px;
+}
+
+.field-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 3px;
+}
+
+.field-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.field-val.muted {
+  font-weight: 400;
+  color: #64748b;
+}
+
+/* ── Photo placeholder ── */
+.photo-placeholder {
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 10px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.photo-placeholder:hover { background: #f1f5f9; }
+
+/* ── Map placeholder ── */
+.map-placeholder {
+  background: linear-gradient(135deg, #d1fae5, #e0f2fe);
+  border-radius: 10px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #065f46;
+  font-weight: 600;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #a7f3d0;
+}
+
+.map-pin-icon {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: #ef4444;
+  border-radius: 50% 50% 50% 0;
+  transform: translateX(-50%) rotate(-45deg);
+  border: 2px solid #fff;
+}
+
+/* ── Status timeline ── */
+.timeline {
+  padding-left: 18px;
+  position: relative;
+}
+
+.tl-item {
+  position: relative;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.tl-dot {
+  position: absolute;
+  left: -18px;
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.tl-dot.pending { background: #cbd5e1; }
+
+.tl-line {
+  position: absolute;
+  left: -14px;
+  top: 12px;
+  bottom: -12px;
+  width: 1px;
+  background: #e2e8f0;
+}
+
+.tl-time {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* ── Action buttons at bottom ── */
+.panel-actions {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-btn-danger  { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.action-btn-danger:hover { background: #fee2e2; }
+.action-btn-neutral { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+.action-btn-neutral:hover { background: #f1f5f9; }
+
+/* ── Worker notification boxes ── */
+.notif-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 8px;
+  margin-top: 14px;
+}
+
+.notif-section-label:first-child { margin-top: 0; }
+
+/* WhatsApp bubble (outgoing green style) */
+.wa-bubble-out {
+  background: #dcf8c6;
+  border-radius: 12px 2px 12px 12px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #1e293b;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.wa-link { color: #1d4ed8; text-decoration: underline; font-size: 10px; }
+
+/* SMS bubble (incoming gray style) */
+.sms-bubble {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px 12px 12px 12px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #1e293b;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  font-family: 'Courier New', monospace;
+}
+
+/* Reminder bubble */
+.reminder-bubble {
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #92400e;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* ── Leaderboard ── */
+.lb-trophy-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 14px;
+}
+
+.lb-trophy-icon {
+  width: 52px;
+  height: 52px;
+  background: #fef3c7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.lb-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.lb-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+  text-align: center;
+}
+
+/* Badge box */
+.badge-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.badge-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #15803d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge-text-title { font-size: 12px; font-weight: 700; color: #14532d; }
+.badge-text-sub   { font-size: 10px; color: #16a34a; margin-top: 1px; }
+
+/* Leaderboard rows */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 12px;
+}
+
+.lb-row:last-child { border-bottom: none; }
+
+.lb-rank   { width: 22px; font-weight: 700; color: #94a3b8; font-size: 12px; flex-shrink: 0; text-align: center; }
+.lb-name   { flex: 1; font-weight: 600; color: #1e293b; }
+.lb-count  { font-weight: 700; color: #2563eb; min-width: 24px; text-align: right; }
+.lb-medal  { font-size: 16px; }
+
+/* Rank colors */
+.rank-gold   { color: #d97706; }
+.rank-silver { color: #64748b; }
+.rank-bronze { color: #b45309; }
+
+/* ── Citizen tracker box ── */
+.tracker-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 11px;
+  color: #1e40af;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+
+.tracker-url {
+  display: block;
+  font-size: 10px;
+  color: #2563eb;
+  text-decoration: underline;
+  margin-top: 4px;
+  word-break: break-all;
+}
+
+.tracker-result {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 11px;
+  color: #1e293b;
+  line-height: 1.8;
+  margin-top: 8px;
+}

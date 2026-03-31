@@ -1,0 +1,123 @@
+
+<style>
+* { box-sizing: border-box; }
+.dash { background: var(--color-background-secondary); border-radius: 12px; overflow: hidden; font-size: 12px; }
+.topbar { background: #1A1A2E; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+.topbar-title { color: #fff; font-weight: 500; font-size: 13px; }
+.topbar-sub { color: #9FE1CB; font-size: 11px; }
+.nav-pill { background: rgba(255,255,255,0.12); color: #fff; font-size: 10px; padding: 3px 10px; border-radius: 10px; cursor: pointer; }
+.nav-pill.active { background: #0F6E56; }
+.body { display: grid; grid-template-columns: 160px 1fr; min-height: 500px; }
+.sidebar { background: var(--color-background-primary); border-right: 0.5px solid var(--color-border-tertiary); padding: 12px 0; }
+.sideitem { padding: 8px 16px; font-size: 11px; color: var(--color-text-secondary); cursor: pointer; border-radius: 0; display: flex; align-items: center; gap: 7px; }
+.sideitem.active { background: #E1F5EE; color: #085041; font-weight: 500; border-left: 3px solid #0F6E56; }
+.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.main { padding: 14px; }
+.kpi-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.kpi { background: var(--color-background-primary); border-radius: 8px; padding: 10px 12px; border: 0.5px solid var(--color-border-tertiary); }
+.kpi-num { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.kpi-label { font-size: 10px; color: var(--color-text-secondary); margin-top: 2px; }
+.kpi-delta { font-size: 10px; margin-top: 4px; }
+.section-title { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+.table-wrap { background: var(--color-background-primary); border-radius: 8px; border: 0.5px solid var(--color-border-tertiary); overflow: hidden; margin-bottom: 12px; }
+.t-head { display: grid; grid-template-columns: 90px 100px 90px 80px 80px 90px 70px; background: var(--color-background-secondary); padding: 7px 12px; }
+.t-head span, .t-row span { font-size: 10px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-row { display: grid; grid-template-columns: 90px 100px 90px 80px 80px 90px 70px; padding: 7px 12px; border-top: 0.5px solid var(--color-border-tertiary); align-items: center; }
+.t-row span { font-size: 11px; color: var(--color-text-primary); }
+.status-pill { display: inline-block; font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 8px; }
+.s-open     { background: #FAEEDA; color: #633806; }
+.s-progress { background: #E6F1FB; color: #0C447C; }
+.s-resolved { background: #EAF3DE; color: #27500A; }
+.s-escalate { background: #FAECE7; color: #712B13; }
+.filter-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.f-tab { font-size: 10px; padding: 4px 10px; border-radius: 8px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); cursor: pointer; }
+.f-tab.active { background: #E1F5EE; color: #085041; border-color: #9FE1CB; font-weight: 500; }
+.bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chart-mock { background: var(--color-background-primary); border-radius: 8px; border: 0.5px solid var(--color-border-tertiary); padding: 10px 12px; }
+.bar-wrap { display: flex; align-items: flex-end; gap: 5px; height: 60px; margin-top: 8px; }
+.bar { border-radius: 3px 3px 0 0; width: 100%; }
+.pie-wrap { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.pie-legend { font-size: 10px; color: var(--color-text-secondary); line-height: 1.9; }
+.led { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; }
+.worker-row { display: grid; grid-template-columns: 1fr 60px 60px 50px; padding: 6px 12px; border-top: 0.5px solid var(--color-border-tertiary); align-items: center; }
+.avail { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; }
+</style>
+
+<div class="dash">
+  <div class="topbar">
+    <div style="flex:1">
+      <div class="topbar-title">Smart Civic Reporting System</div>
+      <div class="topbar-sub">Supervisor Dashboard</div>
+    </div>
+    <div class="nav-pill active">Dashboard</div>
+    <div class="nav-pill">Map</div>
+    <div class="nav-pill">Analytics</div>
+    <div class="nav-pill">Workers</div>
+    <div class="nav-pill">Leaderboard</div>
+    <div style="width:28px;height:28px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:500;">S</div>
+  </div>
+  <div class="body">
+    <div class="sidebar">
+      <div class="sideitem active"><span class="dot" style="background:#0F6E56"></span>All Complaints</div>
+      <div class="sideitem"><span class="dot" style="background:#EF9F27"></span>Open</div>
+      <div class="sideitem"><span class="dot" style="background:#378ADD"></span>In Progress</div>
+      <div class="sideitem"><span class="dot" style="background:#E24B4A"></span>Escalated</div>
+      <div class="sideitem"><span class="dot" style="background:#639922"></span>Resolved</div>
+      <div style="border-top:0.5px solid var(--color-border-tertiary);margin:8px 0;"></div>
+      <div class="sideitem"><span class="dot" style="background:#888"></span>Sanitation</div>
+      <div class="sideitem"><span class="dot" style="background:#888"></span>Roads & PWD</div>
+      <div class="sideitem"><span class="dot" style="background:#888"></span>Water Supply</div>
+      <div class="sideitem"><span class="dot" style="background:#888"></span>Electricity</div>
+    </div>
+    <div class="main">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-num">142</div><div class="kpi-label">Total today</div><div class="kpi-delta" style="color:#639922">+18 from yesterday</div></div>
+        <div class="kpi"><div class="kpi-num" style="color:#639922">89</div><div class="kpi-label">Resolved today</div><div class="kpi-delta" style="color:#639922">62% rate</div></div>
+        <div class="kpi"><div class="kpi-num" style="color:#E24B4A">7</div><div class="kpi-label">SLA breached</div><div class="kpi-delta" style="color:#E24B4A">Needs attention</div></div>
+        <div class="kpi"><div class="kpi-num">4.2h</div><div class="kpi-label">Avg resolution</div><div class="kpi-delta" style="color:#639922">-0.8h vs last week</div></div>
+      </div>
+
+      <div class="filter-row">
+        <div class="f-tab active">All (142)</div>
+        <div class="f-tab">Open (31)</div>
+        <div class="f-tab">Assigned (15)</div>
+        <div class="f-tab">In Progress (24)</div>
+        <div class="f-tab">Resolved (89)</div>
+        <div class="f-tab" style="color:#712B13;border-color:#F0997B">Escalated (7)</div>
+      </div>
+
+      <div class="section-title">Recent complaints</div>
+      <div class="table-wrap">
+        <div class="t-head">
+          <span>Ticket ID</span><span>Category</span><span>Ward</span><span>Channel</span><span>Worker</span><span>Status</span><span>Time</span>
+        </div>
+        <div class="t-row"><span>CMP-2025-00142</span><span>Drainage</span><span>Anna Nagar W</span><span>WhatsApp</span><span>Ravi K.</span><span><div class="status-pill s-progress">In Progress</div></span><span>1h 20m</span></div>
+        <div class="t-row"><span>CMP-2025-00141</span><span>Garbage</span><span>T. Nagar</span><span>SMS</span><span>Priya S.</span><span><div class="status-pill s-open">Open</div></span><span>2h 05m</span></div>
+        <div class="t-row"><span>CMP-2025-00140</span><span>Pothole</span><span>Adyar</span><span>WhatsApp</span><span>Kumar M.</span><span><div class="status-pill s-resolved">Resolved</div></span><span>3h 12m</span></div>
+        <div class="t-row"><span>CMP-2025-00139</span><span>Water Leak</span><span>Velachery</span><span>IVR</span><span>—</span><span><div class="status-pill s-escalate">Escalated</div></span><span>26h 00m</span></div>
+        <div class="t-row"><span>CMP-2025-00138</span><span>Streetlight</span><span>Kodambakkam</span><span>WhatsApp</span><span>Suresh R.</span><span><div class="status-pill s-progress">In Progress</div></span><span>4h 45m</span></div>
+      </div>
+
+      <div class="bottom-grid">
+        <div class="chart-mock">
+          <div class="section-title">Complaints by category</div>
+          <div class="bar-wrap">
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1"><div class="bar" style="height:55px;background:#0F6E56"></div><div style="font-size:9px;color:var(--color-text-tertiary);margin-top:3px">Garbage</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1"><div class="bar" style="height:40px;background:#534AB7"></div><div style="font-size:9px;color:var(--color-text-tertiary);margin-top:3px">Drain</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1"><div class="bar" style="height:30px;background:#854F0B"></div><div style="font-size:9px;color:var(--color-text-tertiary);margin-top:3px">Pothole</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1"><div class="bar" style="height:22px;background:#185FA5"></div><div style="font-size:9px;color:var(--color-text-tertiary);margin-top:3px">Water</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1"><div class="bar" style="height:18px;background:#993C1D"></div><div style="font-size:9px;color:var(--color-text-tertiary);margin-top:3px">Light</div></div>
+          </div>
+        </div>
+        <div class="chart-mock">
+          <div class="section-title">Workers on duty</div>
+          <div class="t-head" style="grid-template-columns:1fr 60px 60px 50px;margin:0 -12px;padding:5px 12px"><span>Worker</span><span>Status</span><span>Tickets</span><span>Dept</span></div>
+          <div class="worker-row"><span style="font-size:11px"><span class="avail" style="background:#639922"></span>Ravi K.</span><span style="font-size:10px;color:#085041">Active</span><span style="font-size:10px">3</span><span style="font-size:10px;color:var(--color-text-tertiary)">Sanit.</span></div>
+          <div class="worker-row"><span style="font-size:11px"><span class="avail" style="background:#639922"></span>Priya S.</span><span style="font-size:10px;color:#085041">Active</span><span style="font-size:10px">2</span><span style="font-size:10px;color:var(--color-text-tertiary)">Sanit.</span></div>
+          <div class="worker-row"><span style="font-size:11px"><span class="avail" style="background:#EF9F27"></span>Kumar M.</span><span style="font-size:10px;color:#633806">Busy</span><span style="font-size:10px">1</span><span style="font-size:10px;color:var(--color-text-tertiary)">Roads</span></div>
+          <div class="worker-row"><span style="font-size:11px"><span class="avail" style="background:#888"></span>Suresh R.</span><span style="font-size:10px;color:var(--color-text-tertiary)">Offline</span><span style="font-size:10px">0</span><span style="font-size:10px;color:var(--color-text-tertiary)">Elect.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
