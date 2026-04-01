@@ -7,12 +7,22 @@ const supabase = require('../config/supabase');
  */
 const uploadMediaToSupabase = async (mediaUrl, ticketId, type = 'completion') => {
     try {
-        // 1. Download from source
-        const response = await axios({
+        // 1. Download from source (Vonage media URLs require auth)
+        const axiosConfig = {
             method: 'get',
             url: mediaUrl,
             responseType: 'arraybuffer'
-        });
+        };
+
+        // Add Vonage auth if downloading from Vonage media API
+        if (mediaUrl.includes('nexmo.com') || mediaUrl.includes('vonage.com')) {
+            axiosConfig.auth = {
+                username: process.env.VONAGE_API_KEY,
+                password: process.env.VONAGE_API_SECRET
+            };
+        }
+
+        const response = await axios(axiosConfig);
 
         const contentType = response.headers['content-type'];
         const extension = contentType.split('/')[1] || 'jpg';
