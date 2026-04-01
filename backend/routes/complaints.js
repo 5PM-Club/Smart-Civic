@@ -126,8 +126,8 @@ router.post('/', async (req, res) => {
 
         if (error) throw error;
 
-        // Auto-Dispatch disabled (manual assignment only)
-        // dispatchComplaint(complaint.id);
+        // Auto-Dispatch enabled
+        dispatchComplaint(complaint.id);
 
         // Increment citizen complaint count
         try {
