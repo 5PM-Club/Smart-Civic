@@ -182,8 +182,9 @@ router.patch('/:id/status', async (req, res) => {
 
             // 1. Notify Worker (Always English for admin technical details)
             const workerMsg = `Hello ${complaint.workers.name}! A new ticket ${complaint.ticket_id} has been assigned to you.\nCategory: ${complaint.category}\nLocation: ${complaint.address_ward || 'N/A'}\nDescription: ${complaint.description}\nPlease resolve this within the SLA deadline.`;
-            console.log(`[Notification] Sending to Worker: ${complaint.workers.phone}`);
-            await sendMessage(complaint.workers.phone, workerMsg, 'whatsapp', complaint.photo_url);
+            const workerSideNum = process.env.VONAGE_WORKER_NUMBER;
+            console.log(`[Notification] Sending to Worker: ${complaint.workers.phone} from ${workerSideNum || 'default'}`);
+            await sendMessage(complaint.workers.phone, workerMsg, 'whatsapp', complaint.photo_url, workerSideNum);
 
             // 2. Notify Citizen (In their preferred language)
             const citizenMsg = getTranslation(lang, 'worker_assigned', {

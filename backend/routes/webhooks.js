@@ -30,6 +30,7 @@ router.post('/whatsapp/inbound', async (req, res) => {
 
         // Handle string format (standard Vonage Sandbox) vs object format
         const phone = typeof data.from === 'object' ? (data.from.number || '') : (data.from || '');
+        const recipient = typeof data.to === 'object' ? (data.to.number || '') : (data.to || '');
         
         // Handle various Message body formats
         let bodyText = data.text || '';
@@ -60,22 +61,27 @@ router.post('/whatsapp/inbound', async (req, res) => {
             latitude: lat,
             longitude: long,
             messageType: msgType,
-            channel: 'whatsapp'
+            channel: 'whatsapp',
+            recipient: recipient // Added to help handlers know which number was used
         };
 
-        // 1. Identify: Is this a Worker or a Citizen?
+        // 1. Identify Routing: Is the SENDER a registered worker?
+        const senderPhone = phone.startsWith('+') ? phone : `+${phone}`;
+        console.log(`[Routing] Checking if ${senderPhone} is a worker...`);
+        
         const { data: worker } = await supabase
             .from('workers')
             .select('*')
-            .eq('phone', phone.startsWith('+') ? phone : `+${phone}`)
+            .eq('phone', senderPhone)
             .single();
 
         if (worker) {
-            console.log(`[AUTH] Worker ${worker.name} identified.`);
+            console.log(`[AUTH] Worker ${worker.name} identified. Routing to Worker Handler.`);
             return await handleWorkerWhatsApp(normalized, worker);
         }
 
         // 2. Default to Citizen Handler
+        console.log(`[Routing] Sender is not a worker. Routing to Citizen Handler.`);
         await handleWhatsApp(normalized);
     } catch (err) {
         console.error('WhatsApp webhook error:', err.message);

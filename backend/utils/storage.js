@@ -3,14 +3,14 @@ const axios = require('axios');
 const supabase = require('../config/supabase');
 
 /**
- * Downloads a media file from Twilio and uploads it to Supabase Storage.
+ * Downloads a media file (from Vonage or elsewhere) and uploads it to Supabase Storage.
  */
-const uploadTwilioMediaToSupabase = async (twilioUrl, ticketId, type = 'completion') => {
+const uploadMediaToSupabase = async (mediaUrl, ticketId, type = 'completion') => {
     try {
-        // 1. Download from Twilio
+        // 1. Download from source
         const response = await axios({
             method: 'get',
-            url: twilioUrl,
+            url: mediaUrl,
             responseType: 'arraybuffer'
         });
 
@@ -41,4 +41,4 @@ const uploadTwilioMediaToSupabase = async (twilioUrl, ticketId, type = 'completi
     }
 };
 
-module.exports = { uploadTwilioMediaToSupabase };
+module.exports = { uploadMediaToSupabase };

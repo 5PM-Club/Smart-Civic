@@ -6,11 +6,13 @@ const VONAGE_API = 'https://messages-sandbox.nexmo.com/v1/messages';
 /**
  * Sends a WhatsApp message via Vonage Messages API (Sandbox)
  */
-const sendWhatsApp = async (to, body, mediaUrl = null) => {
+const sendWhatsApp = async (to, body, mediaUrl = null, fromOverride = null) => {
     try {
         // Clean the phone number (remove any 'whatsapp:' prefix from old Twilio format)
         const cleanTo = to.replace('whatsapp:', '').replace('+', '');
-        const cleanFrom = (process.env.VONAGE_WHATSAPP_NUMBER || '14157386102').replace('+', '');
+        
+        // Use fromOverride if provided, otherwise fallback to citizen number
+        const cleanFrom = (fromOverride || process.env.VONAGE_WHATSAPP_NUMBER || '14157386102').replace('+', '');
 
         const payload = {
             from: cleanFrom,
@@ -35,7 +37,7 @@ const sendWhatsApp = async (to, body, mediaUrl = null) => {
             headers: { 'Content-Type': 'application/json' }
         });
 
-        console.log(`[Vonage] WhatsApp sent to ${cleanTo}. ID: ${response.data.message_uuid}`);
+        console.log(`[Vonage] WhatsApp sent from ${cleanFrom} to ${cleanTo}. ID: ${response.data.message_uuid}`);
         return response.data.message_uuid;
     } catch (err) {
         console.error('[Vonage] WhatsApp error:', err.response?.data || err.message);
@@ -46,10 +48,10 @@ const sendWhatsApp = async (to, body, mediaUrl = null) => {
 /**
  * Sends an SMS message via Vonage SMS API
  */
-const sendSMS = async (to, body) => {
+const sendSMS = async (to, body, fromOverride = null) => {
     try {
         const cleanTo = to.replace('+', '');
-        const cleanFrom = (process.env.VONAGE_SMS_NUMBER || process.env.VONAGE_WHATSAPP_NUMBER || '14157386102').replace('+', '');
+        const cleanFrom = (fromOverride || process.env.VONAGE_SMS_NUMBER || process.env.VONAGE_WHATSAPP_NUMBER || '14157386102').replace('+', '');
 
         const response = await axios.post('https://rest.nexmo.com/sms/json', {
             from: cleanFrom,
@@ -87,11 +89,11 @@ const makeCall = async (to, message) => {
 /**
  * Unified sender - handles both SMS and WhatsApp
  */
-const sendMessage = async (to, body, channel = 'whatsapp', mediaUrl = null) => {
+const sendMessage = async (to, body, channel = 'whatsapp', mediaUrl = null, fromOverride = null) => {
     if (channel === 'sms') {
-        return await sendSMS(to, body);
+        return await sendSMS(to, body, fromOverride);
     }
-    return await sendWhatsApp(to, body, mediaUrl);
+    return await sendWhatsApp(to, body, mediaUrl, fromOverride);
 };
 
 module.exports = { sendWhatsApp, sendSMS, makeCall, sendMessage };
