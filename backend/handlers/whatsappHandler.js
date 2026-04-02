@@ -151,6 +151,16 @@ const handleWhatsApp = async (msg) => {
                 try {
                     supabase.rpc('increment_complaint_count', { citizen_id_param: session.citizen_id }).then().catch(()=>{});
                 } catch (e) {}
+
+                // Immediately auto-assign a worker from the respective department
+                try {
+                    console.log(`[Auto-Dispatch] Attempting to assign worker for complaint ${complaint.id}...`);
+                    dispatchComplaint(complaint.id).catch(err => {
+                        console.error('[Auto-Dispatch Failed]:', err.message);
+                    });
+                } catch (e) {
+                    console.error('[Auto-Dispatch Error]:', e);
+                }
             }
             
             clearSession(phone);

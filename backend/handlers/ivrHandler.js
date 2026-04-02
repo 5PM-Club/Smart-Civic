@@ -166,8 +166,15 @@ const handleIVRRecording = async (req, res) => {
             } catch (rpcErr) {
                 console.log('[RPC FALLBACK] Updating count manually.');
             }
-            // Auto-Dispatch disabled (manual assignment only)
-            // dispatchComplaint(complaint.id);
+            // Auto-dispatch worker for IVR
+            try {
+                console.log(`[Auto-Dispatch] Attempting to assign worker for IVR complaint ${complaint.id}...`);
+                dispatchComplaint(complaint.id).catch(err => {
+                    console.error('[Auto-Dispatch Failed]:', err.message);
+                });
+            } catch (e) {
+                console.error('[Auto-Dispatch Error]:', e);
+            }
         }
 
         clearSession(phone);
