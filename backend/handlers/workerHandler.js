@@ -110,8 +110,16 @@ const handleWorkerWhatsApp = async (msg, worker) => {
 
             if (!error) {
                 await reply(`Ticket ${session.ticket_id} RESOLVED successfully. Good job!`);
-                // Mark worker as available again
-                await supabase.from('workers').update({ is_available: true }).eq('id', worker.id);
+                // Mark worker as available again ONLY if they have no other active tickets
+                const { count } = await supabase
+                    .from('complaints')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('worker_id', worker.id)
+                    .in('status', ['assigned', 'in_progress']);
+                
+                if (count === 0) {
+                    await supabase.from('workers').update({ is_available: true }).eq('id', worker.id);
+                }
                 
                 // Notify citizen on their original channel (Citizen side number)
                 if (ticket.citizens && ticket.citizens.phone) {
