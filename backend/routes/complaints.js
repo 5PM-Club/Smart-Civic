@@ -84,17 +84,11 @@ router.post('/', async (req, res) => {
         const addressParts = [locality, ward, zone].filter(Boolean);
         const addressWard = addressParts.length > 0 ? addressParts.join(', ') : null;
 
-        // Find department for category
-        const categoryDeptMap = {
-            garbage: 'Sanitation',
-            pothole: 'Roads & PWD',
-            drainage: 'Water & Sewage',
-            water_leak: 'Water & Sewage',
-            streetlight: 'Electricity Board'
-        };
-
+        // Find department for category using utility
+        const { getDeptForCategory } = require('../utils/categoryDeptMap');
+        const deptName = getDeptForCategory(category);
+        
         let departmentId = null;
-        const deptName = categoryDeptMap[category];
         if (deptName) {
             const { data: dept } = await supabase
                 .from('departments')
