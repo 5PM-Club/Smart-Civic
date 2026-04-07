@@ -7,16 +7,17 @@ const supabase = require('../config/supabase');
  */
 const findAvailableWorker = async (departmentId) => {
     try {
-        const { data: worker, error } = await supabase
+        const { data: workers, error } = await supabase
             .from('workers')
             .select('*')
             .eq('department_id', departmentId)
-            .eq('is_available', true)
-            .limit(1)
-            .single();
+            .eq('is_available', true);
 
-        if (error || !worker) return null;
-        return worker;
+        if (error || !workers || workers.length === 0) return null;
+
+        // Simple Random Selection: Prevents everyone getting assigned to the first worker in the list
+        const randomIndex = Math.floor(Math.random() * workers.length);
+        return workers[randomIndex];
     } catch (err) {
         console.error('Routing Engine error:', err.message);
         return null;
